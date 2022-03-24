@@ -1,0 +1,20 @@
+{
+  "name": "chiba-clonk-client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:vulcanize/chiba-clonk-client.git",
+  "author": "contact@deepstacksoft.com",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "@cosmjs/proto-signing": "^0.28.0",
+    "@cosmjs/stargate": "^0.28.0"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}

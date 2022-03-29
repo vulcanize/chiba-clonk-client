@@ -14,17 +14,27 @@ Follow these steps to run the tests:
 
 - Run the chain using `./init.sh`.
 
-- The mnemonic phrase can be seen in the console at the start just after the script is executed.
+- Add a second account with the following:
+  ```bash
+  ethermintd keys add <KEY_NAME> --keyring-backend test
+  ```
 
-- Copy the mnemonic phrase and assign it to variable `MNEMONIC` in the [test file](./src/index.test.ts).
+- Get the account details using:
+  ```bash
+  ethermintd keys list
+  ```
 
-- To export the private key run:
+- Use the address of key `mykey` as the sender address. Copy the address and assign it to `SENDER_ADDRESS` in the [test file](./src/index.test.ts).
+
+- Copy the address of other account and assign it to variable `TO_ADDRESS` in [test file](./src/index.test.ts).
+
+- To export the sender private key run:
 
   ```bash
   ethermintd keys export mykey --unarmored-hex --unsafe
   ```
 
-- Copy the private key and assign it to variable `PRIVATE_KEY` in the [test file](./src/index.test.ts).
+- Copy the private key and assign it to variable `SENDER_PRIVATE_KEY` in the [test file](./src/index.test.ts).
 
 - Run the test in chiba-clonk-client repo:
 
@@ -32,8 +42,11 @@ Follow these steps to run the tests:
   yarn test
   ```
 
-- The account details can be seen using
+- Check account balances after running test:
 
   ```bash
-  ethermintd keys list
+  ethermintd query bank balances <ADDRESS>
+
+  # Example
+  ethermintd query bank balances ethm1ayxjyxxa3z9z0rjff7rpr67h8aqfgn2t9009zc
   ```

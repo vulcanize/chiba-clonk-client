@@ -1,32 +1,9 @@
-import { DirectSecp256k1HdWallet, DirectSecp256k1Wallet } from '@cosmjs/proto-signing';
-import { stringToPath } from '@cosmjs/crypto';
-import { fromHex } from '@cosmjs/encoding';
-
 import { sendTokens } from './index'
 
-const MNEMONIC = "talent dismiss teach girl mutual arctic burger matrix outdoor rude vapor rose boost drastic glimpse govern illness rhythm avoid fetch derive increase harvest oak";
+const SENDER_ADDRESS = 'ethm1ayxjyxxa3z9z0rjff7rpr67h8aqfgn2t9009zc';
+const SENDER_PRIVATE_KEY = '5041b1ace7ea207794f4c5c1c5f987ff8a9d782f194ef5b24bcffaafaf4a019f';
+const TO_ADDRESS = 'ethm12x63cgg82ek97cf8ew9hf6r7je75s5w2smejqv';
 
-const PRIVATE_KEY = "1c6dc846552186ef241489c4e4d10b01086d58b8c2ba06de5dfa589bd52cf23e"
-
-describe('Send tokens', () => {
-  test('Create wallet using mnemonic', async () => {
-    const path = stringToPath("m/44'/60'/0'/0");
-
-    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(
-      MNEMONIC,
-      {
-        prefix: 'ethm',
-        hdPaths: [path]
-      }
-    );
-
-    await sendTokens(wallet)
-  });
-
-  test('Create wallet using private key', async () => {
-    const privateKey = fromHex(PRIVATE_KEY);
-    const wallet = await DirectSecp256k1Wallet.fromKey(privateKey, 'ethm')
-
-    await sendTokens(wallet)
-  });
-})
+test('Send tokens', async () => {
+  await sendTokens(SENDER_PRIVATE_KEY, SENDER_ADDRESS, TO_ADDRESS)
+});

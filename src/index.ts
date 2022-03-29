@@ -1,36 +1,75 @@
-import { OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { assertIsDeliverTxSuccess, SigningStargateClient } from "@cosmjs/stargate";
+import axios from "axios";
+import { generateEndpointAccount, generateEndpointBroadcast, generatePostBodyBroadcast } from '@tharsis/provider';
+import { createMessageSend, createTxRawEIP712, signatureToWeb3Extension } from '@tharsis/transactions'
+import { MessageTypes, signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 
-const RPC_ENDPOINT = "http://127.0.0.1:26657"
+const ETHERMINT_REST_ENDPOINT = 'http://127.0.0.1:1317'
 
-export const sendTokens = async (wallet: OfflineDirectSigner) => {
-  const [firstAccount] = await wallet.getAccounts();
-  console.log("account", firstAccount)
+interface TypedMessageDomain {
+  name?: string;
+  version?: string;
+  chainId?: number;
+  verifyingContract?: string;
+  salt?: ArrayBuffer;
+}
 
-  const client = await SigningStargateClient.connectWithSigner(RPC_ENDPOINT, wallet, { prefix: 'ethm' });
+export const sendTokens = async (senderPrivateKey: string, senderAddress: string, destinationAddress: string) => {
+  let { data: addrData} = await axios.get(`${ETHERMINT_REST_ENDPOINT}${generateEndpointAccount(senderAddress)}`)
 
-  const senderAddress = firstAccount.address
-  const recipient = "ethm1xv9tklw7d82sezh9haa573wufgy59vmwe6xxe5";
+  const chain = {
+    chainId: 9000,
+    cosmosChainId: 'ethermint_9000-1',
+  }
 
-  const amount = {
-    denom: "ethm",
-    amount: "12345",
-  };
+  const sender = {
+    accountAddress: addrData.account.base_account.address,
+    sequence: addrData.account.base_account.sequence,
+    accountNumber: addrData.account.base_account.account_number,
+    pubkey: addrData.account.base_account.pub_key.key,
+  }
 
-  const sendMsg = {
-    typeUrl: "/ethm.bank.v1beta1.MsgSend",
-    value: {
-      fromAddress: senderAddress,
-      toAddress: recipient,
-      amount: [amount],
+  const fee = {
+    amount: '20',
+    denom: 'aphoton',
+    gas: '200000',
+  }
+
+  const memo = ''
+
+  const params = {
+    destinationAddress: destinationAddress,
+    amount: '10',
+    denom: 'aphoton',
+  }
+
+  // Create a MsgSend transaction.
+  const msg = createMessageSend(chain, sender, fee, memo, params)
+  const eipMessageDomain: any = msg.eipToSign.domain;
+
+  // Sign transaction.
+  const signature = signTypedData({
+    data: {
+      types: msg.eipToSign.types as MessageTypes,
+      primaryType: msg.eipToSign.primaryType,
+      domain: eipMessageDomain as TypedMessageDomain,
+      message: msg.eipToSign.message as Record<string, unknown>
     },
-  };
+    privateKey: Buffer.from(senderPrivateKey, 'hex'),
+    version: SignTypedDataVersion.V4
+  })
 
-  const defaultFee = {
-    amount: [],
-    gas: "200000",
-  };
+  let extension = signatureToWeb3Extension(chain, sender, signature)
 
-  const result = await client.signAndBroadcast(senderAddress, [sendMsg], defaultFee);
-  assertIsDeliverTxSuccess(result);
+  // Create the txRaw
+  let rawTx = createTxRawEIP712(msg.legacyAmino.body, msg.legacyAmino.authInfo, extension)
+
+  const body = generatePostBodyBroadcast(rawTx)
+
+  // Broadcast it
+  await axios.post(
+    `${ETHERMINT_REST_ENDPOINT}${generateEndpointBroadcast()}`,
+    JSON.parse(body)
+  )
+
+  // TODO: Check for successful broadcast
 }

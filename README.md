@@ -36,6 +36,18 @@ Follow these steps to run the tests:
 
 - Copy the private key and assign it to variable `SENDER_PRIVATE_KEY` in the [test file](./src/index.test.ts).
 
+- Perform the following steps for testing gov module:
+
+  - Submit a proposal
+    ```bash
+    ethermintd tx gov submit-proposal --title="Test Proposal" --description="My awesome proposal" --type="Text" --deposit="10000000aphoton" --from mykey --fees 20aphoton
+    ```
+
+  - Query for proposal
+    ```bash
+    ethermintd query gov proposals
+    ```
+
 - Run the test in chiba-clonk-client repo:
 
   ```bash
@@ -49,4 +61,14 @@ Follow these steps to run the tests:
 
   # Example
   ethermintd query bank balances ethm1ayxjyxxa3z9z0rjff7rpr67h8aqfgn2t9009zc
+  ```
+
+- Check votes for proposal id 1
+
+  ```bash
+  # Query votes
+  ethermintd query gov votes 1
+
+  # Check votes tally
+  ethermintd query gov tally 1
   ```

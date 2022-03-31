@@ -3249,6 +3249,11 @@ protobufjs@~6.10.2:
     "@types/node" "^13.7.0"
     long "^4.0.0"
 
+protoc-gen-ts@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/protoc-gen-ts/-/protoc-gen-ts-0.8.2.tgz#d762eef409cc3721684078b2b9a2bf5a0c2e761a"
+  integrity sha512-KRHMRLQqhDnaGq31qLDxhW4vcGmPqS2NS1XflDJyUBt2G6Egy9exBKFA2leyDgRab0BBRshoSXpJMkqmRtoQ6w==
+
 psl@^1.1.33:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/psl/-/psl-1.8.0.tgz#9326f8bcfb013adcc005fdff056acce020e51c24"

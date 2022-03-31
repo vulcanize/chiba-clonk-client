@@ -17,6 +17,9 @@ Follow these steps to run the tests:
 - Add a second account with the following:
   ```bash
   ethermintd keys add <KEY_NAME> --keyring-backend test
+
+  # Example
+  ethermintd keys add key2 --keyring-backend test
   ```
 
 - Get the account details using:

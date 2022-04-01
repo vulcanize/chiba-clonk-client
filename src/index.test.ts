@@ -1,8 +1,8 @@
 import { createBond, sendDeposit, sendTokens, sendVote } from './index'
 
-const SENDER_ADDRESS = 'ethm1ztkuzewqh0att04kn4gpkfk7vupmylcp3gr4zj';
-const SENDER_PRIVATE_KEY = '765082238ae967c6e6514a7984410dfe268f233959a01c7dc746e8a5ac0faa9a';
-const TO_ADDRESS = 'ethm1h3drdgazq4m4gtnxtl6kkuq3cxczrmnq6u24eq';
+const SENDER_ADDRESS = 'ethm1kgwzff36qmx5tvfvfr7wvdurp5mr25csyqxgdm';
+const SENDER_PRIVATE_KEY = '12e94bcc0daecd936b499f3eeb3b3b76ac1410cbaff2ee6c6f64d768453db0cf';
+const TO_ADDRESS = 'ethm1e6r855un2ufnne9cdpujvan5srxjand37pepuz';
 
 test('Send tokens', async () => {
   await sendTokens(SENDER_PRIVATE_KEY, SENDER_ADDRESS, TO_ADDRESS)
@@ -29,7 +29,7 @@ describe('Gov module', () => {
   })
 })
 
-xdescribe('Bond module', () => {
+describe('Bond module', () => {
   test('Create bond', async () => {
     const bondParams = {
       amount: '100',

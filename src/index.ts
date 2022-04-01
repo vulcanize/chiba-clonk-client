@@ -12,7 +12,7 @@ import {
 } from '@tharsis/transactions'
 
 import { createTxMsgDeposit, MessageMsgDeposit } from "./gov";
-import { createTxMsgCreateBond, MessageMsgCreateBond } from "./bond";
+import { createTxMsgCreateBond, createTxMsgRefillBond, MessageMsgCreateBond, MessageMsgRefillBond } from "./bond";
 
 const ETHERMINT_REST_ENDPOINT = 'http://127.0.0.1:1317'
 
@@ -137,6 +137,33 @@ export const createBond = async (senderPrivateKey: string, senderAddress: string
   const memo = ''
 
   const msg = createTxMsgCreateBond(chain, sender, fee, memo, params)
+  await signAndSendMessage(senderPrivateKey, chain, sender, msg)
+}
+
+export const refillBond = async (senderPrivateKey: string, senderAddress: string, params: MessageMsgRefillBond) => {
+  let { data: addrData} = await axios.get(`${ETHERMINT_REST_ENDPOINT}${generateEndpointAccount(senderAddress)}`)
+
+  const chain = {
+    chainId: 9000,
+    cosmosChainId: 'ethermint_9000-1',
+  }
+
+  const sender = {
+    accountAddress: addrData.account.base_account.address,
+    sequence: addrData.account.base_account.sequence,
+    accountNumber: addrData.account.base_account.account_number,
+    pubkey: addrData.account.base_account.pub_key.key,
+  }
+
+  const fee = {
+    amount: '20',
+    denom: 'aphoton',
+    gas: '200000',
+  }
+
+  const memo = ''
+
+  const msg = createTxMsgRefillBond(chain, sender, fee, memo, params)
   await signAndSendMessage(senderPrivateKey, chain, sender, msg)
 }
 

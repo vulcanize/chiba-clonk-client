@@ -75,3 +75,9 @@ Follow these steps to run the tests:
   # Check votes tally
   ethermintd query gov tally 1
   ```
+
+- Check bonds list:
+
+  ```bash
+  ethermintd query bond list
+  ```

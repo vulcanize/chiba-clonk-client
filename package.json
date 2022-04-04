@@ -4,7 +4,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:vulcanize/chiba-clonk-client.git",
-  "author": "contact@deepstacksoft.com",
+  "author": "",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@types/is-url": "^1.2.30",
     "@types/jest": "^27.4.1",

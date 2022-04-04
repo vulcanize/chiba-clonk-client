@@ -53,13 +53,17 @@ export class Registry {
     return message.log || DEFAULT_WRITE_ERROR;
   }
 
-  constructor(url: string, cosmosChainId = DEFAULT_CHAIN_ID) {
-    if (!isUrl(url)) {
-      throw new Error('Path to a registry GQL endpoint should be provided.');
+  constructor(restUrl: string, gqlUrl: string, cosmosChainId = DEFAULT_CHAIN_ID) {
+    if (!isUrl(restUrl)) {
+      throw new Error('Path to a REST endpoint should be provided.');
     }
 
-    this._endpoint = url;
-    this._client = new RegistryClient(url);
+    if (!isUrl(gqlUrl)) {
+      throw new Error('Path to a GQL endpoint should be provided.');
+    }
+
+    this._endpoint = restUrl;
+    this._client = new RegistryClient(restUrl, gqlUrl);
 
     this._chain = {
       chainId: 9000,
@@ -85,13 +89,27 @@ export class Registry {
       const accountObj = account.base_account;
 
       const nextSeq = parseInt(accountObj.sequence, 10) + 1;
-      result = sha256(`${accountObj.address}:${accountObj.number}:${nextSeq}`);
+      result = sha256(`${accountObj.address}:${accountObj.account_number}:${nextSeq}`);
     } catch (err: any) {
       const error = err[0] || err;
       throw new Error(Registry.processWriteError(error));
     }
 
     return result;
+  }
+
+  /**
+   * Get bonds by ids.
+   */
+   async getBondsByIds(ids: string[]) {
+    return this._client.getBondsByIds(ids);
+  }
+
+  /**
+   * Query bonds by attributes.
+   */
+   async queryBonds(attributes = {}) {
+    return this._client.queryBonds(attributes);
   }
 
   /**

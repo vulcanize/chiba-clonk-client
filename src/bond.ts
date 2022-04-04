@@ -37,6 +37,25 @@ const MSG_REFILL_BOND_TYPES = {
   ],
 }
 
+const MSG_WITHDRAW_BOND_TYPES = {
+  MsgValue: [
+    { name: 'id', type: 'string' },
+    { name: 'signer', type: 'string' },
+    { name: 'coins', type: 'TypeCoins[]' },
+  ],
+  TypeCoins: [
+    { name: 'denom', type: 'string' },
+    { name: 'amount', type: 'string' },
+  ],
+}
+
+const MSG_CANCEL_BOND_TYPES = {
+  MsgValue: [
+    { name: 'id', type: 'string' },
+    { name: 'signer', type: 'string' },
+  ]
+}
+
 export interface MessageMsgCreateBond {
   amount: string
   denom: string
@@ -46,6 +65,16 @@ export interface MessageMsgRefillBond {
   id: string,
   amount: string
   denom: string
+}
+
+export interface MessageMsgWithdrawBond {
+  id: string
+  amount: string
+  denom: string
+}
+
+export interface MessageMsgCancelBond {
+  id: string
 }
 
 export function createTxMsgCreateBond(
@@ -168,6 +197,124 @@ export function createTxMsgRefillBond(
   }
 }
 
+export function createTxMsgWithdrawBond(
+  chain: Chain,
+  sender: Sender,
+  fee: Fee,
+  memo: string,
+  params: MessageMsgWithdrawBond,
+) {
+  // EIP712
+  const feeObject = generateFee(
+    fee.amount,
+    fee.denom,
+    fee.gas,
+    sender.accountAddress,
+  )
+  const types = generateTypes(MSG_WITHDRAW_BOND_TYPES)
+
+  const msg = createMsgWithdrawBond(
+    params.id,
+    sender.accountAddress,
+    params.amount,
+    params.denom
+  )
+
+  const messages = generateMessage(
+    sender.accountNumber.toString(),
+    sender.sequence.toString(),
+    chain.cosmosChainId,
+    memo,
+    feeObject,
+    msg,
+  )
+  const eipToSign = createEIP712(types, chain.chainId, messages)
+
+  // Cosmos
+  const msgCosmos = protoCreateMsgWithdrawBond(
+    params.id,
+    sender.accountAddress,
+    params.amount,
+    params.denom
+  )
+
+  const tx = createTransaction(
+    msgCosmos,
+    memo,
+    fee.amount,
+    fee.denom,
+    parseInt(fee.gas, 10),
+    'ethsecp256',
+    sender.pubkey,
+    sender.sequence,
+    sender.accountNumber,
+    chain.cosmosChainId,
+  )
+
+  return {
+    signDirect: tx.signDirect,
+    legacyAmino: tx.legacyAmino,
+    eipToSign,
+  }
+}
+
+export function createTxMsgCancelBond(
+  chain: Chain,
+  sender: Sender,
+  fee: Fee,
+  memo: string,
+  params: MessageMsgCancelBond,
+) {
+  // EIP712
+  const feeObject = generateFee(
+    fee.amount,
+    fee.denom,
+    fee.gas,
+    sender.accountAddress,
+  )
+  const types = generateTypes(MSG_CANCEL_BOND_TYPES)
+
+  const msg = createMsgCancelBond(
+    params.id,
+    sender.accountAddress
+  )
+
+  const messages = generateMessage(
+    sender.accountNumber.toString(),
+    sender.sequence.toString(),
+    chain.cosmosChainId,
+    memo,
+    feeObject,
+    msg,
+  )
+  const eipToSign = createEIP712(types, chain.chainId, messages)
+
+  // Cosmos
+  const msgCosmos = protoCreateMsgCancelBond(
+    params.id,
+    sender.accountAddress
+  )
+
+  const tx = createTransaction(
+    msgCosmos,
+    memo,
+    fee.amount,
+    fee.denom,
+    parseInt(fee.gas, 10),
+    'ethsecp256',
+    sender.pubkey,
+    sender.sequence,
+    sender.accountNumber,
+    chain.cosmosChainId,
+  )
+
+  return {
+    signDirect: tx.signDirect,
+    legacyAmino: tx.legacyAmino,
+    eipToSign,
+  }
+}
+
 function createMsgCreateBond(
   signer: string,
   amount: string,
@@ -249,5 +396,77 @@ const protoCreateMsgRefillBond = (
   return {
     message: refillBondMessage,
     path: 'vulcanize.bond.v1beta1.MsgRefillBond',
+  }
+}
+
+function createMsgWithdrawBond(
+  id: string,
+  signer: string,
+  amount: string,
+  denom: string,
+) {
+  return {
+    type: 'bond/MsgWithdrawBond',
+    value: {
+      id,
+      coins: [
+        {
+          amount,
+          denom,
+        },
+      ],
+      signer
+    },
+  }
+}
+
+const protoCreateMsgWithdrawBond = (
+  id: string,
+  signer: string,
+  amount: string,
+  denom: string,
+) => {
+  const value = new coin.cosmos.base.v1beta1.Coin({
+    denom,
+    amount,
+  })
+
+  const withdrawBondMessage = new bondTx.vulcanize.bond.v1beta1.MsgWithdrawBond({
+    id,
+    signer,
+    coins: [value]
+  })
+
+  return {
+    message: withdrawBondMessage,
+    path: 'vulcanize.bond.v1beta1.MsgWithdrawBond',
+  }
+}
+
+function createMsgCancelBond(
+  id: string,
+  signer: string
+) {
+  return {
+    type: 'bond/MsgCancelBond',
+    value: {
+      id,
+      signer
+    },
+  }
+}
+
+const protoCreateMsgCancelBond = (
+  id: string,
+  signer: string
+) => {
+  const cancelBondMessage = new bondTx.vulcanize.bond.v1beta1.MsgCancelBond({
+    id,
+    signer
+  })
+
+  return {
+    message: cancelBondMessage,
+    path: 'vulcanize.bond.v1beta1.MsgCancelBond',
   }
 }

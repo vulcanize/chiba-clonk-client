@@ -8,7 +8,7 @@ import {
   Fee,
 } from '@tharsis/transactions'
 
-import { createTxMsgCreateBond, MessageMsgCreateBond } from "./bond";
+import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, createTxMsgWithdrawBond, MessageMsgCancelBond, MessageMsgCreateBond, MessageMsgRefillBond, MessageMsgWithdrawBond } from "./bond";
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
@@ -21,7 +21,6 @@ export const DEFAULT_CHAIN_ID = 'ethermint_9000-1';
 export const parseTxResponse = (result: any) => {
   const { txhash: hash, height, ...txResponse } = result;
   txResponse.data = txResponse.data && Buffer.from(txResponse.data, 'base64').toString('utf8');
-  txResponse.log = JSON.parse(txResponse.raw_log);
 
   txResponse.events.forEach((event:any) => {
     event.attributes = event.attributes.map(({ key, value }: { key: string, value: string }) => ({
@@ -129,6 +128,84 @@ export class Registry {
       }
 
       const msg = createTxMsgCreateBond(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Refill bond.
+   */
+   async refillBond(params: MessageMsgRefillBond, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgRefillBond(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Withdraw (from) bond.
+   */
+   async withdrawBond(params: MessageMsgWithdrawBond, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgWithdrawBond(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Cancel bond.
+   */
+   async cancelBond(params: MessageMsgCancelBond, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgCancelBond(this._chain, sender, fee, '', params)
       result = await this._submitTx(msg, privateKey, sender);
     } catch (err: any) {
       const error = err[0] || err;

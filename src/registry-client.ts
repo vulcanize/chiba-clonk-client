@@ -5,6 +5,55 @@ import { generateEndpointAccount, generateEndpointBroadcast, generatePostBodyBro
 
 import { Util } from './util';
 
+const auctionFields = `
+  id
+  status
+  ownerAddress
+  createTime
+  commitsEndTime
+  revealsEndTime
+  commitFee {
+    type
+    quantity
+  }
+  revealFee {
+    type
+    quantity
+  }
+  minimumBid {
+    type
+    quantity
+  }
+  winnerAddress
+  winnerBid {
+    type
+    quantity
+  }
+  winnerPrice {
+    type
+    quantity
+  }
+  bids {
+    bidderAddress
+    status
+    commitHash
+    commitTime
+    revealTime
+    commitFee {
+      type
+      quantity
+    }
+    revealFee {
+      type
+      quantity
+    }
+    bidAmount {
+      type
+      quantity
+    }
+  }
+`;
+
 /**
  * Registry
  */
@@ -49,6 +98,33 @@ export class RegistryClient {
     let { data } = await axios.get(`${this._restEndpoint}${generateEndpointAccount(address)}`)
 
     return data
+  }
+
+  /**
+   * Lookup authorities by names.
+   */
+   async lookupAuthorities(names: string[], auction = false) {
+    assert(names.length);
+
+    const query = `query ($names: [String!]) {
+      lookupAuthorities(names: $names) {
+        ownerAddress
+        ownerPublicKey
+        height
+        status
+        bondId
+        expiryTime
+        ${auction ? ('auction { ' + auctionFields + ' }') : ''}
+      }
+    }`;
+
+    const variables = {
+      names
+    };
+
+    const result = await this._graph(query)(variables);
+
+    return result['lookupAuthorities'];
   }
 
   /**

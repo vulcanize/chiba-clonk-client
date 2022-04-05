@@ -12,6 +12,7 @@ import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, cr
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
+import { createTxMsgReserveAuthority, MessageMsgReserveAuthority } from './nameservice';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
@@ -216,6 +217,39 @@ export class Registry {
   }
 
   /**
+   * Reserve authority.
+   */
+   async reserveAuthority(params: MessageMsgReserveAuthority, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgReserveAuthority(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Lookup authorities by names.
+   */
+   async lookupAuthorities(names: string[], auction = false) {
+    return this._client.lookupAuthorities(names, auction);
+  }
+
+  /**
    * Submit a generic Tx to the chain.
    */
    async _submitTx(message: any, privateKey: string, sender: Sender) {
@@ -237,3 +271,5 @@ export class Registry {
     return response;
   }
 }
+
+export { Account }

@@ -1,5 +1,5 @@
-const DEFAULT_PRIVATE_KEY = '3d8e23810daecb66ec4ca97805f6bbfc102015c3f22cdda1a783b1d074c43bdd';
-const DEFAULT_ADDRESS = 'ethm1lrdrh056ce23h9d9d5rx34tp0uwj0u9zumynx3'
+const DEFAULT_PRIVATE_KEY = '39e06e1471f69a76491e60d1d22908789bf7801039a9ac2197ed432ad45d2daf';
+const DEFAULT_ADDRESS = 'ethm1p9fqwtlypqptuqgndpce5g6wncj4py9z30wfkt'
 
 export const wait = (time: number) => new Promise(resolve => setTimeout(resolve, time))
 

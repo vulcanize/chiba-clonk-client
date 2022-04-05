@@ -1,7 +1,4 @@
 import {
-  createEIP712,
-  generateFee,
-  generateMessage,
   generateTypes,
 } from '@tharsis/eip712'
 import {
@@ -9,10 +6,10 @@ import {
   Sender,
   Fee,
 } from '@tharsis/transactions'
-import { createTransaction } from '@tharsis/proto'
 
-import * as bondTx from './proto/vulcanize/bond/v1beta1/tx'
-import * as coin from './proto/cosmos/base/v1beta1/coin'
+import * as bondTx from '../proto/vulcanize/bond/v1beta1/tx'
+import * as coin from '../proto/cosmos/base/v1beta1/coin'
+import { createTx } from './util'
 
 const MSG_CREATE_BOND_TYPES = {
   MsgValue: [
@@ -84,13 +81,6 @@ export function createTxMsgCreateBond(
   memo: string,
   params: MessageMsgCreateBond,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
   const types = generateTypes(MSG_CREATE_BOND_TYPES)
 
   const msg = createMsgCreateBond(
@@ -99,41 +89,13 @@ export function createTxMsgCreateBond(
     params.denom
   )
 
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
-
-  // Cosmos
   const msgCosmos = protoCreateMsgCreateBond(
     sender.accountAddress,
     params.amount,
     params.denom
   )
 
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    'ethsecp256',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
 }
 
 export function createTxMsgRefillBond(
@@ -143,13 +105,6 @@ export function createTxMsgRefillBond(
   memo: string,
   params: MessageMsgRefillBond,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
   const types = generateTypes(MSG_REFILL_BOND_TYPES)
 
   const msg = createMsgRefillBond(
@@ -159,17 +114,6 @@ export function createTxMsgRefillBond(
     params.denom
   )
 
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
-
-  // Cosmos
   const msgCosmos = protoCreateMsgRefillBond(
     params.id,
     sender.accountAddress,
@@ -177,24 +121,7 @@ export function createTxMsgRefillBond(
     params.denom
   )
 
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    'ethsecp256',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
 }
 
 export function createTxMsgWithdrawBond(
@@ -204,13 +131,6 @@ export function createTxMsgWithdrawBond(
   memo: string,
   params: MessageMsgWithdrawBond,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
   const types = generateTypes(MSG_WITHDRAW_BOND_TYPES)
 
   const msg = createMsgWithdrawBond(
@@ -220,17 +140,6 @@ export function createTxMsgWithdrawBond(
     params.denom
   )
 
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
-
-  // Cosmos
   const msgCosmos = protoCreateMsgWithdrawBond(
     params.id,
     sender.accountAddress,
@@ -238,24 +147,7 @@ export function createTxMsgWithdrawBond(
     params.denom
   )
 
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    'ethsecp256',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
 }
 
 export function createTxMsgCancelBond(
@@ -265,13 +157,6 @@ export function createTxMsgCancelBond(
   memo: string,
   params: MessageMsgCancelBond,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
   const types = generateTypes(MSG_CANCEL_BOND_TYPES)
 
   const msg = createMsgCancelBond(
@@ -279,40 +164,12 @@ export function createTxMsgCancelBond(
     sender.accountAddress
   )
 
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
-
-  // Cosmos
   const msgCosmos = protoCreateMsgCancelBond(
     params.id,
     sender.accountAddress
   )
 
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    'ethsecp256',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
 }
 
 function createMsgCreateBond(

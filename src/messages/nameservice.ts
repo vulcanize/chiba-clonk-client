@@ -1,7 +1,4 @@
 import {
-  createEIP712,
-  generateFee,
-  generateMessage,
   generateTypes,
 } from '@tharsis/eip712'
 import {
@@ -9,9 +6,9 @@ import {
   Sender,
   Fee,
 } from '@tharsis/transactions'
-import { createTransaction } from '@tharsis/proto'
 
-import * as nameserviceTx from './proto/vulcanize/nameservice/v1beta1/tx'
+import * as nameserviceTx from '../proto/vulcanize/nameservice/v1beta1/tx'
+import { createTx } from './util'
 
 const MSG_RESERVE_AUTHORITY_TYPES = {
   MsgValue: [
@@ -33,13 +30,6 @@ export function createTxMsgReserveAuthority(
   memo: string,
   params: MessageMsgReserveAuthority,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
   const types = generateTypes(MSG_RESERVE_AUTHORITY_TYPES)
 
   const msg = createMsgReserveAuthority(
@@ -48,41 +38,13 @@ export function createTxMsgReserveAuthority(
     params.owner
   )
 
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
-
-  // Cosmos
   const msgCosmos = protoCreateMsgReserveAuthority(
     params.name,
     sender.accountAddress,
     params.owner
   )
 
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    'ethsecp256',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
 }
 
 function createMsgReserveAuthority(

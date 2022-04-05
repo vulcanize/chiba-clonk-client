@@ -4,7 +4,7 @@ import * as ecc from 'tiny-secp256k1';
 import * as bip39 from 'bip39';
 import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
-import { toBech32, toHex } from '@cosmjs/encoding';
+import { toBech32 } from '@cosmjs/encoding';
 import { rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
 
 const HDPATH = "m/44'/60'/0'/0";
@@ -22,14 +22,13 @@ interface TypedMessageDomain {
 /**
  * Registry account.
  */
-// TODO(egor): This is a wrapper around the private key and doesn't have any account related stuff (e.g. account number/sequence). Maybe rename to Key?
 export class Account {
   _privateKey: Buffer
   _publicKey?: Uint8Array
   _cosmosAddress?: string
   _formattedCosmosAddress?: string
 
-    /**
+  /**
    * Generate bip39 mnemonic.
    */
   static generateMnemonic() {
@@ -53,7 +52,6 @@ export class Account {
 
   /**
    * New Account.
-   * @param {buffer} privateKey
    */
   constructor(privateKey: Buffer) {
     assert(privateKey);

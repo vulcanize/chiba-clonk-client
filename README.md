@@ -1,6 +1,6 @@
 # chiba-clonk-client
 
-## Development
+## Tests
 
 Follow these steps to run the tests:
 
@@ -10,13 +10,9 @@ Follow these steps to run the tests:
   yarn
   ```
 
-- Clone the [chiba-clonk repo](https://github.com/deep-stack/chiba-clonk) and change to repo directory.
+- Copy [.env.example](./.env.example) file and create a `.env` file.
 
-- Checkout to appropriate branch for running tests.
-
-  ```bash
-  git checkout ng-v12-chiba-clonk-client
-  ```
+- Clone the [chiba-clonk repo](https://github.com/vulcanize/chiba-clonk) and change to repo directory.
 
 - Run the chain using `./init.sh`.
 
@@ -25,7 +21,7 @@ Follow these steps to run the tests:
   ethermintd keys list
   ```
 
-- Use the address of key `mykey` and assign it to `DEFAULT_ADDRESS` in the [test helper file](./src/testing/helper.ts).
+- Use the address of key `mykey` and assign it to `ACCOUNT_ADDRESS` in the `.env` file.
 
 - To export the private key run:
 
@@ -33,10 +29,14 @@ Follow these steps to run the tests:
   ethermintd keys export mykey --unarmored-hex --unsafe
   ```
 
-- Copy the private key and assign it to variable `DEFAULT_PRIVATE_KEY` in the [test helper file](./src/testing/helper.ts).
+- Copy the private key and assign it to variable `PRIVATE_KEY` in the `.env` file.
 
 - Run the test in chiba-clonk-client repo:
 
   ```bash
   yarn test
   ```
+
+## Development
+
+[README](./DEVELOPMENT.md)

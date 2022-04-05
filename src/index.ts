@@ -1,7 +1,7 @@
 
 import isUrl from 'is-url';
 import { sha256 } from 'js-sha256';
-import { generatePostBodyBroadcast } from '@tharsis/provider';
+import { generatePostBodyBroadcast, BroadcastMode } from '@tharsis/provider';
 import {
   Chain,
   Sender,
@@ -10,11 +10,11 @@ import {
   MessageSendParams
 } from '@tharsis/transactions'
 
-import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, createTxMsgWithdrawBond, MessageMsgCancelBond, MessageMsgCreateBond, MessageMsgRefillBond, MessageMsgWithdrawBond } from "./bond";
+import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, createTxMsgWithdrawBond, MessageMsgCancelBond, MessageMsgCreateBond, MessageMsgRefillBond, MessageMsgWithdrawBond } from "./messages/bond";
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
-import { createTxMsgReserveAuthority, MessageMsgReserveAuthority } from './nameservice';
+import { createTxMsgReserveAuthority, MessageMsgReserveAuthority } from './messages/nameservice';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
@@ -82,10 +82,6 @@ export class Registry {
 
   /**
    * Send coins.
-   * @param {object[]} amount
-   * @param {string} toAddress
-   * @param {string} privateKey
-   * @param {object} fee
    */
    async sendCoins(params: MessageSendParams, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
@@ -296,7 +292,7 @@ export class Registry {
     // Generate signed Tx.
     const transaction = createTransaction(message, account, sender, this._chain);
 
-    const tx = generatePostBodyBroadcast(transaction)
+    const tx = generatePostBodyBroadcast(transaction, BroadcastMode.Block)
 
     // Submit Tx to chain.
     const { tx_response: response } = await this._client.submit(tx);

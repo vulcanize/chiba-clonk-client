@@ -15,7 +15,7 @@ Follow these steps to run the tests:
 - Checkout to appropriate branch for running tests.
 
   ```bash
-  git checkout ng-chiba-clonk-client
+  git checkout ng-v12-chiba-clonk-client
   ```
 
 - Run the chain using `./init.sh`.

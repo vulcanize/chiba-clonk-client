@@ -6,6 +6,8 @@ import {
   Chain,
   Sender,
   Fee,
+  createMessageSend,
+  MessageSendParams
 } from '@tharsis/transactions'
 
 import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, createTxMsgWithdrawBond, MessageMsgCancelBond, MessageMsgCreateBond, MessageMsgRefillBond, MessageMsgWithdrawBond } from "./bond";
@@ -76,6 +78,36 @@ export class Registry {
    */
    async getAccount(address: string) {
     return this._client.getAccount(address);
+  }
+
+  /**
+   * Send coins.
+   * @param {object[]} amount
+   * @param {string} toAddress
+   * @param {string} privateKey
+   * @param {object} fee
+   */
+   async sendCoins(params: MessageSendParams, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createMessageSend(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
   }
 
   /**

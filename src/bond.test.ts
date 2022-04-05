@@ -1,9 +1,9 @@
 import { Registry } from './index';
-import { getConfig, wait } from './testing/helper';
+import { getConfig } from './testing/helper';
 
 const TX_WAIT_TIME = 5000; // in milliseconds.
 
-const { mockServer, chibaClonk: { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } } = getConfig();
+const { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } = getConfig();
 
 jest.setTimeout(90 * 1000);
 
@@ -21,7 +21,6 @@ const bondTests = () => {
     bondId1 = await registry.getNextBondId(accountAddress);
     expect(bondId1).toBeDefined();
     await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, accountAddress, privateKey, fee);
-    await wait(TX_WAIT_TIME)
   })
 
   test('Get bond by ID.', async () => {
@@ -49,7 +48,6 @@ const bondTests = () => {
 
   test('Refill bond.', async () => {
     await registry.refillBond({ id: bondId1, denom: 'aphoton', amount: '500' }, accountAddress, privateKey, fee);
-    await wait(TX_WAIT_TIME);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond).toBeDefined();
@@ -60,7 +58,6 @@ const bondTests = () => {
 
   test('Withdraw bond.', async () => {
     await registry.withdrawBond({ id: bondId1, denom: 'aphoton', amount: '500' }, accountAddress, privateKey, fee);
-    await wait(TX_WAIT_TIME);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond).toBeDefined();
@@ -71,7 +68,6 @@ const bondTests = () => {
 
   test('Cancel bond.', async () => {
     await registry.cancelBond({ id: bondId1 }, accountAddress, privateKey, fee);
-    await wait(TX_WAIT_TIME);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond.id).toBe("");
@@ -80,9 +76,4 @@ const bondTests = () => {
   });
 };
 
-if (mockServer) {
-  // Required as jest complains if file has no tests.
-  test('skipping bond tests', () => {});
-} else {
-  describe('Bonds', bondTests);
-}
+describe('Bonds', bondTests);

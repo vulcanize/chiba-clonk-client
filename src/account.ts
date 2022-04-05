@@ -1,6 +1,15 @@
 import assert from 'assert';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+import * as bip39 from 'bip39';
 import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth-sig-util';
-import { Secp256k1 } from "@cosmjs/crypto";
+import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
+import { toBech32, toHex } from '@cosmjs/encoding';
+import { rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+
+const HDPATH = "m/44'/60'/0'/0";
+
+const bip32 = BIP32Factory(ecc);
 
 interface TypedMessageDomain {
   name?: string;
@@ -17,6 +26,30 @@ interface TypedMessageDomain {
 export class Account {
   _privateKey: Buffer
   _publicKey?: Uint8Array
+  _cosmosAddress?: string
+  _formattedCosmosAddress?: string
+
+    /**
+   * Generate bip39 mnemonic.
+   */
+  static generateMnemonic() {
+    return bip39.generateMnemonic();
+  }
+
+  /**
+   * Generate private key from mnemonic.
+   */
+  static async generateFromMnemonic(mnemonic: string) {
+    assert(mnemonic);
+
+    const seed = await bip39.mnemonicToSeed(mnemonic);
+    const wallet = bip32.fromSeed(seed);
+    const account = wallet.derivePath(HDPATH);
+    const { privateKey } = account;
+    assert(privateKey);
+
+    return new Account(privateKey);
+  }
 
   /**
    * New Account.
@@ -32,12 +65,23 @@ export class Account {
     return this._privateKey;
   }
 
+  get formattedCosmosAddress() {
+    return this._formattedCosmosAddress;
+  }
+
   async init () {
     // Generate public key.
     const keypair = await Secp256k1.makeKeypair(this._privateKey);
 
     const compressed = Secp256k1.compressPubkey(keypair.pubkey);
     this._publicKey = compressed
+
+    // 2. Generate cosmos-sdk address.
+    // let publicKeySha256 = sha256(this._publicKey);
+    this._cosmosAddress = new Ripemd160().update(keypair.pubkey).digest().toString();
+
+    // 3. Generate cosmos-sdk formatted address.
+    this._formattedCosmosAddress = toBech32('ethm', rawSecp256k1PubkeyToRawAddress(this._publicKey));
   }
 
   /**

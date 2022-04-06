@@ -18,7 +18,7 @@ import { createTxMsgReserveAuthority, MessageMsgReserveAuthority } from './messa
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
-export const DEFAULT_CHAIN_ID = 'ethermint_9000-1';
+export const DEFAULT_CHAIN_ID = 'chibaclonk_9000-1';
 
 // Parse Tx response from cosmos-sdk.
 export const parseTxResponse = (result: any) => {

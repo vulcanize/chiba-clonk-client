@@ -5,7 +5,7 @@ export const getConfig = () => {
   assert(process.env.ACCOUNT_ADDRESS);
 
   return {
-    chainId: process.env.CHIBA_CLONK_CHAIN_ID || 'ethermint_9000-1',
+    chainId: process.env.CHIBA_CLONK_CHAIN_ID || 'chibaclonk_9000-1',
     privateKey: process.env.PRIVATE_KEY,
     accountAddress: process.env.ACCOUNT_ADDRESS,
     restEndpoint: process.env.CHIBA_CLONK_REST_ENDPOINT || 'http://localhost:1317',

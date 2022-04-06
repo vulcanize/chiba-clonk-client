@@ -18,7 +18,7 @@ Follow these steps to run the tests:
 
 - Get the account details using:
   ```bash
-  ethermintd keys list
+  chibaclonkd keys list
   ```
 
 - Use the address of key `mykey` and assign it to `ACCOUNT_ADDRESS` in the `.env` file.
@@ -26,7 +26,7 @@ Follow these steps to run the tests:
 - To export the private key run:
 
   ```bash
-  ethermintd keys export mykey --unarmored-hex --unsafe
+  chibaclonkd keys export mykey --unarmored-hex --unsafe
   ```
 
 - Copy the private key and assign it to variable `PRIVATE_KEY` in the `.env` file.

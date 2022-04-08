@@ -14,7 +14,7 @@ import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, cr
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
-import { createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord } from './messages/nameservice';
+import { createTxMsgDeleteName, createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgDeleteName, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord } from './messages/nameservice';
 import { Payload, Record } from './types';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
@@ -80,6 +80,20 @@ export class Registry {
    */
    async getAccount(address: string) {
     return this._client.getAccount(address);
+  }
+
+  /**
+   * Get records by attributes.
+   */
+  async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {
+    return this._client.queryRecords(attributes, all, refs);
+  }
+
+  /**
+   * Resolve names to records.
+   */
+  async resolveNames(names: string[], refs = false) {
+    return this._client.resolveNames(names, refs);
   }
 
   /**
@@ -245,7 +259,7 @@ export class Registry {
   /**
    * Cancel bond.
    */
-   async cancelBond(params: MessageMsgCancelBond, senderAddress: string, privateKey: string, fee: Fee) {
+  async cancelBond(params: MessageMsgCancelBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
 
     try {
@@ -338,7 +352,7 @@ export class Registry {
    * @param {string} privateKey
    * @param {object} fee
    */
-   async setName(params: MessageMsgSetName, senderAddress: string, privateKey: string, fee: Fee) {
+  async setName(params: MessageMsgSetName, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
 
     try {
@@ -352,6 +366,39 @@ export class Registry {
       }
 
       const msg = createTxMsgSetName(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Lookup naming information.
+   */
+  async lookupNames(names: string[], history = false) {
+    return this._client.lookupNames(names, history);
+  }
+
+  /**
+   * Delete name (WRN) mapping.
+   */
+  async deleteName(params: MessageMsgDeleteName, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgDeleteName(this._chain, sender, fee, '', params)
       result = await this._submitTx(msg, privateKey, sender);
     } catch (err: any) {
       const error = err[0] || err;

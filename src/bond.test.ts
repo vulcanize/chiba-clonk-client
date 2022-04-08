@@ -1,8 +1,6 @@
 import { Registry } from './index';
 import { getConfig } from './testing/helper';
 
-const TX_WAIT_TIME = 5000; // in milliseconds.
-
 const { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } = getConfig();
 
 jest.setTimeout(90 * 1000);

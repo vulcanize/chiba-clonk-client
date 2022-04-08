@@ -1,8 +1,12 @@
 import assert from 'assert';
+import path from 'path';
 
 import { Account } from './account';
 import { Registry } from './index';
-import { getConfig } from './testing/helper';
+import { ensureUpdatedConfig, getConfig } from './testing/helper';
+
+const WATCHER_ID = 'bafyreibmr47ksukoadck2wigevb2jp5j5oubfadeyzb6zi57ydjsvjmmby'
+const WATCHER_YML_PATH = path.join(__dirname, './testing/data/watcher.yml');
 
 jest.setTimeout(120 * 1000);
 
@@ -10,10 +14,11 @@ const { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } = 
 
 const namingTests = () => {
   let registry: Registry;
-
   let bondId: string;
-
+  let watcher: any;
+  let watcherId: string;
   let authorityName: string;
+  let wrn: string;
 
   beforeAll(async () => {
     registry = new Registry(restEndpoint, gqlEndpoint, chainId);
@@ -21,6 +26,23 @@ const namingTests = () => {
     // Create bond.
     bondId = await registry.getNextBondId(accountAddress);
     await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, accountAddress, privateKey, fee);
+
+    // Create bot.
+    watcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
+    const result = await registry.setRecord(
+      {
+        privateKey,
+        bondId,
+        record: watcher.record
+      },
+      accountAddress,
+      privateKey,
+      fee
+    )
+
+    // TODO: Get id from setRecord response.
+    // watcherId = result.data;
+    watcherId = WATCHER_ID;
   });
 
   test('Reserve authority.', async () => {
@@ -83,6 +105,16 @@ const namingTests = () => {
     expect(record.ownerAddress).toBe(otherAccount1.formattedCosmosAddress);
     expect(record.ownerPublicKey).toBeDefined();
     expect(Number(record.height)).toBeGreaterThan(0);
+  });
+
+  xtest('Set name for unbonded authority', async () => {
+    wrn = `wrn://${authorityName}/app/test`;
+    assert(watcherId)
+    await expect(registry.setName({ wrn, cid: watcherId }, accountAddress, privateKey, fee)).rejects.toThrow('Authority bond not found.');
+  });
+
+  test('Set authority bond', async () => {
+    await registry.setAuthorityBond({ name: authorityName, bondId }, accountAddress, privateKey, fee);
   });
 };
 

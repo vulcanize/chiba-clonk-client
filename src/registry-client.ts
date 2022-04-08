@@ -1,9 +1,40 @@
 import assert from 'assert';
 import axios from 'axios';
 import graphqlClient from 'graphql.js'
-import { generateEndpointAccount, generateEndpointBroadcast, generatePostBodyBroadcast } from '@tharsis/provider';
+import { get, set } from 'lodash'
+import { generateEndpointAccount, generateEndpointBroadcast } from '@tharsis/provider';
 
 import { Util } from './util';
+
+const attributeField = `
+  attributes {
+    key
+    value {
+      null
+      int
+      float
+      string
+      boolean
+      json
+      reference {
+        id
+      }
+    }
+  }
+`;
+
+const refsField = `
+  references {
+    id
+  }
+`;
+
+const historyFields = `
+  history {
+    id
+    height
+  }
+`;
 
 const auctionFields = `
   id
@@ -64,7 +95,7 @@ export class RegistryClient {
   /**
    * Get query result.
    */
-   static async getResult(query: any, key: string, modifier?: (rows: any[]) => {}) {
+  static async getResult(query: any, key: string, modifier?: (rows: any[]) => {}) {
     const result = await query;
     if (result && result[key] && result[key].length && result[key][0] !== null) {
       if (modifier) {
@@ -73,6 +104,19 @@ export class RegistryClient {
       return result[key];
     }
     return [];
+  }
+
+  /**
+   * Prepare response attributes.
+   */
+  static prepareAttributes(path: string) {
+    return (rows: any[]) => {
+      const result = rows.map(r => {
+        set(r, path, Util.fromGQLAttributes(get(r, path)));
+        return r;
+      });
+      return result;
+    };
   }
 
   /**
@@ -101,6 +145,38 @@ export class RegistryClient {
   }
 
   /**
+   * Get records by attributes.
+   */
+   async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {
+    if (!attributes) {
+      attributes = {};
+    }
+
+    const query = `query ($attributes: [KeyValueInput!], $all: Boolean) {
+      queryRecords(attributes: $attributes, all: $all) {
+        id
+        names
+        owners
+        bondId
+        createTime
+        expiryTime
+        ${attributeField}
+        ${refs ? refsField : ''}
+      }
+    }`;
+
+    const variables = {
+      attributes: Util.toGQLAttributes(attributes),
+      all
+    };
+
+    let result = (await this._graph(query)(variables))['queryRecords'];
+    result = RegistryClient.prepareAttributes('attributes')(result);
+
+    return result;
+  }
+
+  /**
    * Lookup authorities by names.
    */
    async lookupAuthorities(names: string[], auction = false) {
@@ -125,6 +201,60 @@ export class RegistryClient {
     const result = await this._graph(query)(variables);
 
     return result['lookupAuthorities'];
+  }
+
+  /**
+   * Lookup names.
+   */
+  async lookupNames(names: string[], history = false) {
+    assert(names.length);
+
+    const query = `query ($names: [String!]) {
+      lookupNames(names: $names) {
+        latest {
+          id
+          height
+        }
+        ${history ? historyFields : ''}
+      }
+    }`;
+
+    const variables = {
+      names
+    };
+
+    const result = await this._graph(query)(variables);
+
+    return result['lookupNames'];
+  }
+
+  /**
+   * Resolve names to records.
+   */
+  async resolveNames(names: string[], refs = false) {
+    assert(names.length);
+
+    const query = `query ($names: [String!]) {
+      resolveNames(names: $names) {
+        id
+        names
+        owners
+        bondId
+        createTime
+        expiryTime
+        ${attributeField}
+        ${refs ? refsField : ''}
+      }
+    }`;
+
+    const variables = {
+      names
+    };
+
+    const result = (await this._graph(query)(variables))['resolveNames'];
+    result.records = RegistryClient.prepareAttributes('attributes')(result);
+
+    return result;
   }
 
   /**

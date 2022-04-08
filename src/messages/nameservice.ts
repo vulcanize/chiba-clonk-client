@@ -60,6 +60,13 @@ const MSG_SET_AUTHORITY_BOND_TYPES = {
   ],
 }
 
+const MSG_DELETE_NAME_TYPES = {
+  MsgValue: [
+    { name: 'wrn', type: 'string' },
+    { name: 'signer', type: 'string' },
+  ],
+}
+
 export interface MessageMsgReserveAuthority {
   name: string
   owner: string
@@ -78,6 +85,10 @@ export interface MessageMsgSetRecord {
 export interface MessageMsgSetAuthorityBond {
   name: string
   bondId: string
+}
+
+export interface MessageMsgDeleteName {
+  wrn: string
 }
 
 export function createTxMsgReserveAuthority(
@@ -170,6 +181,28 @@ export function createTxMsgSetAuthorityBond(
   const msgCosmos = protoCreateMsgSetAuthorityBond(
     params.name,
     params.bondId,
+    sender.accountAddress
+  )
+
+  return createTx(chain, sender, fee, memo, types, msg, msgCosmos)
+}
+
+export function createTxMsgDeleteName(
+  chain: Chain,
+  sender: Sender,
+  fee: Fee,
+  memo: string,
+  params: MessageMsgDeleteName,
+) {
+  const types = generateTypes(MSG_DELETE_NAME_TYPES)
+
+  const msg = createMsgDeleteName(
+    params.wrn,
+    sender.accountAddress
+  )
+
+  const msgCosmos = protoCreateMsgDeleteName(
+    params.wrn,
     sender.accountAddress
   )
 
@@ -314,5 +347,33 @@ const protoCreateMsgSetAuthorityBond = (
   return {
     message: setAuthorityBondMessage,
     path: 'vulcanize.nameservice.v1beta1.MsgSetAuthorityBond',
+  }
+}
+
+function createMsgDeleteName(
+  wrn: string,
+  signer: string
+) {
+  return {
+    type: 'nameservice/DeleteAuthority',
+    value: {
+      wrn,
+      signer
+    },
+  }
+}
+
+const protoCreateMsgDeleteName = (
+  wrn: string,
+  signer: string
+) => {
+  const deleteNameAutorityMessage = new nameserviceTx.vulcanize.nameservice.v1beta1.MsgDeleteNameAuthority({
+    wrn,
+    signer,
+  })
+
+  return {
+    message: deleteNameAutorityMessage,
+    path: 'vulcanize.nameservice.v1beta1.MsgDeleteNameAuthority',
   }
 }

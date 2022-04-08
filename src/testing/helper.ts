@@ -10,6 +10,13 @@ export const ensureUpdatedConfig = async (path: string) => {
   return conf;
 };
 
+export const getBaseConfig = async (path: string) => {
+  const conf = await yaml.read(path);
+  conf.record.version = '0.0.1';
+
+  return conf;
+};
+
 export const getConfig = () => {
   assert(process.env.PRIVATE_KEY);
   assert(process.env.ACCOUNT_ADDRESS);

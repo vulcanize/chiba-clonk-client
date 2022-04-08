@@ -24,6 +24,7 @@ const namingTests = () => {
   let authorityName: string;
   let otherAuthorityName: string;
   let otherPrivateKey: string;
+  let otherAccountAddress: string;
 
   let wrn: string;
 
@@ -155,8 +156,7 @@ const namingTests = () => {
     expect(records).toHaveLength(1);
 
     const [{ attributes }] = records;
-    // TODO: Set name with new record.
-    // expect(attributes).toEqual(watcher.record);
+    expect(attributes).toEqual(watcher.record);
   });
 
   test('Lookup name with history', async () => {
@@ -207,14 +207,15 @@ const namingTests = () => {
     const mnenonic = Account.generateMnemonic();
     const otherAccount = await Account.generateFromMnemonic(mnenonic);
     await otherAccount.init()
-    assert(otherAccount.formattedCosmosAddress)
     // TODO: Get correct account address from private key.
-    await registry.sendCoins({ denom: 'aphoton', amount: '1000000000', destinationAddress: otherAccount.formattedCosmosAddress }, accountAddress, privateKey, fee);
+    assert(otherAccount.formattedCosmosAddress);
+    otherAccountAddress = otherAccount.formattedCosmosAddress
+    await registry.sendCoins({ denom: 'aphoton', amount: '1000000000', destinationAddress: otherAccountAddress }, accountAddress, privateKey, fee);
 
     // Other account reserves an authority.
     otherAuthorityName = `other-${Date.now()}`;
     otherPrivateKey = otherAccount.privateKey.toString('hex');
-    await registry.reserveAuthority({ name: otherAuthorityName, owner: otherAccount.formattedCosmosAddress }, otherAccount.formattedCosmosAddress, otherPrivateKey, fee);
+    await registry.reserveAuthority({ name: otherAuthorityName, owner: otherAccountAddress }, otherAccountAddress, otherPrivateKey, fee);
 
     // Try setting name under other authority.
     await expect(registry.setName({ wrn: `wrn://${otherAuthorityName}/app/test`, cid: watcherId }, accountAddress, privateKey, fee)).rejects.toThrow('Access denied.');
@@ -259,6 +260,31 @@ const namingTests = () => {
     records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
     expect(records).toBeDefined();
     // expect(records).toHaveLength(1);
+  });
+
+  test('Delete already deleted name', async () => {
+    await registry.deleteName({ wrn }, accountAddress, privateKey, fee);
+
+    const records = await registry.lookupNames([wrn], true);
+    expect(records).toBeDefined();
+    expect(records).toBeDefined();
+    expect(records).toHaveLength(1);
+
+    const [{ latest }] = records;
+    expect(latest).toBeDefined();
+    expect(latest.id).toBeDefined();
+    expect(latest.id).toBe('');
+    expect(latest.height).toBeDefined();
+  });
+
+  xtest('Delete name for non-owned authority.', async () => {
+    const otherBondId = await registry.getNextBondId(otherPrivateKey);
+    await registry.createBond({ denom: 'aphoton', amount: '10000' }, otherAccountAddress, otherPrivateKey, fee);
+    await registry.setAuthorityBond({ name: otherAuthorityName, bondId: otherBondId }, otherAccountAddress, otherPrivateKey, fee);
+    await registry.setName({ wrn: `wrn://${otherAuthorityName}/app/test`, cid: watcherId }, otherAccountAddress, otherPrivateKey, fee);
+
+    // Try deleting name under other authority.
+    await expect(registry.deleteName({ wrn: `wrn://${otherAuthorityName}/app/test` }, accountAddress, privateKey, fee)).rejects.toThrow('Access denied.');
   });
 };
 

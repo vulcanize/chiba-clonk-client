@@ -1,4 +1,3 @@
-
 import isUrl from 'is-url';
 import { sha256 } from 'js-sha256';
 import { generatePostBodyBroadcast, BroadcastMode } from '@tharsis/provider';

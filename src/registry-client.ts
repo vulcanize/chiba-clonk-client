@@ -251,8 +251,8 @@ export class RegistryClient {
       names
     };
 
-    const result = (await this._graph(query)(variables))['resolveNames'];
-    result.records = RegistryClient.prepareAttributes('attributes')(result);
+    let result = (await this._graph(query)(variables))['resolveNames'];
+    result = RegistryClient.prepareAttributes('attributes')(result);
 
     return result;
   }

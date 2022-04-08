@@ -2,11 +2,17 @@ import assert from 'assert';
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bip39 from 'bip39';
+import canonicalStringify from 'canonical-json';
+import secp256k1 from 'secp256k1';
 import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
-import { toBech32 } from '@cosmjs/encoding';
+import { fromHex, toBech32, toHex } from '@cosmjs/encoding';
 import { rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
 
+import { Payload, Signature } from './types';
+import { sha256 } from 'js-sha256';
+
+const AMINO_PREFIX = 'EB5AE98721';
 const HDPATH = "m/44'/60'/0'/0";
 
 const bip32 = BIP32Factory(ecc);
@@ -27,6 +33,8 @@ export class Account {
   _publicKey?: Uint8Array
   _cosmosAddress?: string
   _formattedCosmosAddress?: string
+  _registryPublicKey?: string
+  _registryAddress?: string
 
   /**
    * Generate bip39 mnemonic.
@@ -67,6 +75,14 @@ export class Account {
     return this._formattedCosmosAddress;
   }
 
+  get registryPublicKey() {
+    return this._registryPublicKey;
+  }
+
+  get registryAddress() {
+    return this._registryAddress;
+  }
+
   async init () {
     // Generate public key.
     const keypair = await Secp256k1.makeKeypair(this._privateKey);
@@ -75,11 +91,18 @@ export class Account {
     this._publicKey = compressed
 
     // 2. Generate cosmos-sdk address.
-    // let publicKeySha256 = sha256(this._publicKey);
     this._cosmosAddress = new Ripemd160().update(keypair.pubkey).digest().toString();
 
     // 3. Generate cosmos-sdk formatted address.
     this._formattedCosmosAddress = toBech32('ethm', rawSecp256k1PubkeyToRawAddress(this._publicKey));
+
+    // 4. Generate registry formatted public key.
+    const publicKeyInHex = AMINO_PREFIX + toHex(this._publicKey);
+    this._registryPublicKey = Buffer.from(publicKeyInHex, 'hex').toString('base64');
+
+    // 5. Generate registry formatted address.
+    let publicKeySha256 = sha256(Buffer.from(publicKeyInHex, 'hex'));
+    this._registryAddress = new Ripemd160().update(fromHex(publicKeySha256)).digest().toString();
   }
 
   /**
@@ -87,6 +110,41 @@ export class Account {
    */
   getPrivateKey() {
     return this._privateKey.toString('hex');
+  }
+
+  /**
+   * Get record signature.
+   * @param {object} record
+   */
+  async signRecord(record: any) {
+    assert(record);
+
+    const recordAsJson = canonicalStringify(record);
+    // Double sha256.
+    const recordBytesToSign = Buffer.from(sha256(Buffer.from(sha256(Buffer.from(recordAsJson)), 'hex')), 'hex');
+
+    // Sign message
+    assert(recordBytesToSign);
+
+    const messageToSignSha256 = sha256(recordBytesToSign);
+    const messageToSignSha256InBytes = Buffer.from(messageToSignSha256, 'hex');
+    const sigObj = secp256k1.ecdsaSign(messageToSignSha256InBytes, this.privateKey);
+
+    return Buffer.from(sigObj.signature);
+  }
+
+  async signPayload(payload: Payload) {
+    assert(payload);
+
+    const { record } = payload;
+    const messageToSign = record.getMessageToSign();
+
+    const sig = await this.signRecord(messageToSign);
+    assert(this.registryPublicKey)
+    const signature = new Signature(this.registryPublicKey, sig.toString('base64'));
+    payload.addSignature(signature);
+
+    return signature;
   }
 
   /**

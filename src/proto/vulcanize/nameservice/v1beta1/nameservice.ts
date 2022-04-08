@@ -311,11 +311,11 @@ export namespace vulcanize.nameservice.v1beta1 {
         constructor(data?: any[] | {
             id?: string;
             bond_id?: string;
-            create_time?: dependency_2.google.protobuf.Timestamp;
-            expiry_time?: dependency_2.google.protobuf.Timestamp;
+            create_time?: string;
+            expiry_time?: string;
             deleted?: boolean;
             owners?: string[];
-            attributes?: Uint8Array;
+            attributes?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [6], []);
@@ -356,16 +356,16 @@ export namespace vulcanize.nameservice.v1beta1 {
             pb_1.Message.setField(this, 2, value);
         }
         get create_time() {
-            return pb_1.Message.getWrapperField(this, dependency_2.google.protobuf.Timestamp, 3) as dependency_2.google.protobuf.Timestamp;
+            return pb_1.Message.getField(this, 3) as string;
         }
-        set create_time(value: dependency_2.google.protobuf.Timestamp) {
-            pb_1.Message.setWrapperField(this, 3, value);
+        set create_time(value: string) {
+            pb_1.Message.setField(this, 3, value);
         }
         get expiry_time() {
-            return pb_1.Message.getWrapperField(this, dependency_2.google.protobuf.Timestamp, 4) as dependency_2.google.protobuf.Timestamp;
+            return pb_1.Message.getField(this, 4) as string;
         }
-        set expiry_time(value: dependency_2.google.protobuf.Timestamp) {
-            pb_1.Message.setWrapperField(this, 4, value);
+        set expiry_time(value: string) {
+            pb_1.Message.setField(this, 4, value);
         }
         get deleted() {
             return pb_1.Message.getField(this, 5) as boolean;
@@ -380,19 +380,19 @@ export namespace vulcanize.nameservice.v1beta1 {
             pb_1.Message.setField(this, 6, value);
         }
         get attributes() {
-            return pb_1.Message.getField(this, 7) as Uint8Array;
+            return pb_1.Message.getField(this, 7) as string;
         }
-        set attributes(value: Uint8Array) {
+        set attributes(value: string) {
             pb_1.Message.setField(this, 7, value);
         }
         static fromObject(data: {
             id?: string;
             bond_id?: string;
-            create_time?: ReturnType<typeof dependency_2.google.protobuf.Timestamp.prototype.toObject>;
-            expiry_time?: ReturnType<typeof dependency_2.google.protobuf.Timestamp.prototype.toObject>;
+            create_time?: string;
+            expiry_time?: string;
             deleted?: boolean;
             owners?: string[];
-            attributes?: Uint8Array;
+            attributes?: string;
         }) {
             const message = new Record({});
             if (data.id != null) {
@@ -402,10 +402,10 @@ export namespace vulcanize.nameservice.v1beta1 {
                 message.bond_id = data.bond_id;
             }
             if (data.create_time != null) {
-                message.create_time = dependency_2.google.protobuf.Timestamp.fromObject(data.create_time);
+                message.create_time = data.create_time;
             }
             if (data.expiry_time != null) {
-                message.expiry_time = dependency_2.google.protobuf.Timestamp.fromObject(data.expiry_time);
+                message.expiry_time = data.expiry_time;
             }
             if (data.deleted != null) {
                 message.deleted = data.deleted;
@@ -422,11 +422,11 @@ export namespace vulcanize.nameservice.v1beta1 {
             const data: {
                 id?: string;
                 bond_id?: string;
-                create_time?: ReturnType<typeof dependency_2.google.protobuf.Timestamp.prototype.toObject>;
-                expiry_time?: ReturnType<typeof dependency_2.google.protobuf.Timestamp.prototype.toObject>;
+                create_time?: string;
+                expiry_time?: string;
                 deleted?: boolean;
                 owners?: string[];
-                attributes?: Uint8Array;
+                attributes?: string;
             } = {};
             if (this.id != null) {
                 data.id = this.id;
@@ -435,10 +435,10 @@ export namespace vulcanize.nameservice.v1beta1 {
                 data.bond_id = this.bond_id;
             }
             if (this.create_time != null) {
-                data.create_time = this.create_time.toObject();
+                data.create_time = this.create_time;
             }
             if (this.expiry_time != null) {
-                data.expiry_time = this.expiry_time.toObject();
+                data.expiry_time = this.expiry_time;
             }
             if (this.deleted != null) {
                 data.deleted = this.deleted;
@@ -459,16 +459,16 @@ export namespace vulcanize.nameservice.v1beta1 {
                 writer.writeString(1, this.id);
             if (typeof this.bond_id === "string" && this.bond_id.length)
                 writer.writeString(2, this.bond_id);
-            if (this.create_time !== undefined)
-                writer.writeMessage(3, this.create_time, () => this.create_time.serialize(writer));
-            if (this.expiry_time !== undefined)
-                writer.writeMessage(4, this.expiry_time, () => this.expiry_time.serialize(writer));
+            if (typeof this.create_time === "string" && this.create_time.length)
+                writer.writeString(3, this.create_time);
+            if (typeof this.expiry_time === "string" && this.expiry_time.length)
+                writer.writeString(4, this.expiry_time);
             if (this.deleted !== undefined)
                 writer.writeBool(5, this.deleted);
             if (this.owners !== undefined)
                 writer.writeRepeatedString(6, this.owners);
-            if (this.attributes !== undefined)
-                writer.writeBytes(7, this.attributes);
+            if (typeof this.attributes === "string" && this.attributes.length)
+                writer.writeString(7, this.attributes);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -485,10 +485,10 @@ export namespace vulcanize.nameservice.v1beta1 {
                         message.bond_id = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.create_time, () => message.create_time = dependency_2.google.protobuf.Timestamp.deserialize(reader));
+                        message.create_time = reader.readString();
                         break;
                     case 4:
-                        reader.readMessage(message.expiry_time, () => message.expiry_time = dependency_2.google.protobuf.Timestamp.deserialize(reader));
+                        message.expiry_time = reader.readString();
                         break;
                     case 5:
                         message.deleted = reader.readBool();
@@ -497,7 +497,7 @@ export namespace vulcanize.nameservice.v1beta1 {
                         pb_1.Message.addToRepeatedField(message, 6, reader.readString());
                         break;
                     case 7:
-                        message.attributes = reader.readBytes();
+                        message.attributes = reader.readString();
                         break;
                     default: reader.skipField();
                 }

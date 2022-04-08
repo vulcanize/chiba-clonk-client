@@ -1,4 +1,14 @@
 import assert from 'assert';
+import yaml from 'node-yaml';
+import semver from 'semver';
+
+export const ensureUpdatedConfig = async (path: string) => {
+  const conf = await yaml.read(path);
+  conf.record.version = semver.inc(conf.record.version, 'patch');
+  await yaml.write(path, conf);
+
+  return conf;
+};
 
 export const getConfig = () => {
   assert(process.env.PRIVATE_KEY);

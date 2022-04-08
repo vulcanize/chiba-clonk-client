@@ -14,7 +14,8 @@ import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, cr
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
-import { createTxMsgReserveAuthority, MessageMsgReserveAuthority } from './messages/nameservice';
+import { createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord } from './messages/nameservice';
+import { Payload, Record } from './types';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
@@ -51,6 +52,7 @@ export class Registry {
           path: [ 'submit' ]
       }g
     */
+    console.error(error)
     const message = JSON.parse(error.message);
     return message.log || DEFAULT_WRITE_ERROR;
   }
@@ -78,6 +80,28 @@ export class Registry {
    */
    async getAccount(address: string) {
     return this._client.getAccount(address);
+  }
+
+  /**
+ * Publish record.
+ * @param transactionPrivateKey - private key in HEX to sign transaction.
+ */
+  async setRecord(
+    params: { privateKey: string, record: any, bondId: string },
+    senderAddress: string,
+    transactionPrivateKey: string,
+    fee: Fee
+  ) {
+    let result;
+
+    try {
+      result = await this._submitRecordTx(params, senderAddress, transactionPrivateKey, fee);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
   }
 
   /**
@@ -247,7 +271,7 @@ export class Registry {
   /**
    * Reserve authority.
    */
-   async reserveAuthority(params: MessageMsgReserveAuthority, senderAddress: string, privateKey: string, fee: Fee) {
+  async reserveAuthority(params: MessageMsgReserveAuthority, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
 
     try {
@@ -271,10 +295,122 @@ export class Registry {
   }
 
   /**
+   * Set authority bond.
+   * @param {string} name
+   * @param {string} bondId
+   * @param {string} privateKey
+   * @param {object} fee
+   */
+  async setAuthorityBond(params: MessageMsgSetAuthorityBond, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgSetAuthorityBond(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
    * Lookup authorities by names.
    */
-   async lookupAuthorities(names: string[], auction = false) {
+  async lookupAuthorities(names: string[], auction = false) {
     return this._client.lookupAuthorities(names, auction);
+  }
+
+  /**
+   * Set name (WRN) to record ID (CID).
+   * @param {string} wrn
+   * @param {string} id
+   * @param {string} privateKey
+   * @param {object} fee
+   */
+   async setName(params: MessageMsgSetName, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+
+    try {
+      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+      const sender = {
+        accountAddress: accountInfo.address,
+        sequence: accountInfo.sequence,
+        accountNumber: accountInfo.account_number,
+        pubkey: accountInfo.pub_key.key,
+      }
+
+      const msg = createTxMsgSetName(this._chain, sender, fee, '', params)
+      result = await this._submitTx(msg, privateKey, sender);
+    } catch (err: any) {
+      const error = err[0] || err;
+      throw new Error(Registry.processWriteError(error));
+    }
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Submit record transaction.
+   * @param privateKey - private key in HEX to sign message.
+   * @param txPrivateKey - private key in HEX to sign transaction.
+   */
+  async _submitRecordTx(
+    { privateKey, record, bondId }: { privateKey: string, record: any, bondId: string },
+    senderAddress: string,
+    txPrivateKey: string,
+    fee: Fee
+  ) {
+    if (!isKeyValid(privateKey)) {
+      throw new Error('Registry privateKey should be a hex string.');
+    }
+
+    if (!isKeyValid(bondId)) {
+      throw new Error(`Invalid bondId: ${bondId}.`);
+    }
+
+    // Sign record.
+    const recordSignerAccount = new Account(Buffer.from(privateKey, 'hex'));
+    await recordSignerAccount.init();
+    const registryRecord = new Record(record);
+    const payload = new Payload(registryRecord);
+    await recordSignerAccount.signPayload(payload);
+
+    // Send record payload Tx.
+    return this._submitRecordPayloadTx({ payload, bondId }, senderAddress, txPrivateKey, fee);
+  }
+
+  async _submitRecordPayloadTx(params: MessageMsgSetRecord, senderAddress: string, privateKey: string, fee: Fee) {
+    if (!isKeyValid(privateKey)) {
+      throw new Error('Registry privateKey should be a hex string.');
+    }
+
+    if (!isKeyValid(params.bondId)) {
+      throw new Error(`Invalid bondId: ${params.bondId}.`);
+    }
+
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
+    }
+
+    const msg = createTxMsgSetRecord(this._chain, sender, fee, '', params)
+    return this._submitTx(msg, privateKey, sender);
   }
 
   /**

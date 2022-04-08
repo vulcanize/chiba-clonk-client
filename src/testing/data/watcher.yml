@@ -1,0 +1,6 @@
+record:
+  type: watcher
+  name: ERC20 Watcher
+  version: 1.0.0
+  protocol:
+    /: QmdeazkS38aCrqG6qKwaio2fQnShE6RGpmNdqStLkkZcQN

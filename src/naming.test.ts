@@ -76,7 +76,7 @@ const namingTests = () => {
     expect(Number(record.height)).toBe(0);
   });
 
-  xtest('Reserve already reserved authority', async () => {
+  test('Reserve already reserved authority', async () => {
     await expect(registry.reserveAuthority({ name: authorityName, owner: accountAddress }, accountAddress, privateKey, fee)).rejects.toThrow('Name already reserved.');
   });
 
@@ -116,7 +116,7 @@ const namingTests = () => {
     expect(Number(record.height)).toBeGreaterThan(0);
   });
 
-  xtest('Set name for unbonded authority', async () => {
+  test('Set name for unbonded authority', async () => {
     wrn = `wrn://${authorityName}/app/test`;
     assert(watcherId)
     await expect(registry.setName({ wrn, cid: watcherId }, accountAddress, privateKey, fee)).rejects.toThrow('Authority bond not found.');
@@ -197,7 +197,7 @@ const namingTests = () => {
     expect(oldRecord.height).toBeDefined();
   });
 
-  xtest('Set name without reserving authority', async () => {
+  test('Set name without reserving authority', async () => {
     await expect(registry.setName({ wrn: 'wrn://not-reserved/app/test', cid: watcherId }, accountAddress, privateKey, fee))
       .rejects.toThrow('Name authority not found.');
   });

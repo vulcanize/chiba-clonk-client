@@ -13,7 +13,7 @@ import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, cr
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
-import { createTxMsgDeleteName, createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgDeleteName, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord } from './messages/nameservice';
+import { createTxMsgDeleteName, createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgDeleteName, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord, NAMESERVICE_ERRORS } from './messages/nameservice';
 import { Payload, Record } from './types';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
@@ -42,18 +42,12 @@ export class Registry {
   _chain: Chain
   _client: RegistryClient
 
-  static processWriteError(error: Error) {
-    /**
-      Example:
+  static processWriteError(error: string) {
+    // error string a stacktrace containing the message.
+    // https://gist.github.com/nikugogoi/de55d390574ded3466abad8bffd81952#file-txresponse-js-L7
+    const errorMessage = NAMESERVICE_ERRORS.find(message => error.includes(message))
 
-      {
-        message: '{"code":18,"data":null,"log":"invalid request: Name already reserved.: failed to execute message; message index: 0","info":"","gasWanted":"200000","gasUsed":"86717","events":[],"codespace":"sdk"}',
-          path: [ 'submit' ]
-      }g
-    */
-    console.error(error)
-    const message = JSON.parse(error.message);
-    return message.log || DEFAULT_WRITE_ERROR;
+    return errorMessage || DEFAULT_WRITE_ERROR;
   }
 
   constructor(restUrl: string, gqlUrl: string, cosmosChainId = DEFAULT_CHAIN_ID) {
@@ -106,13 +100,7 @@ export class Registry {
     fee: Fee
   ) {
     let result;
-
-    try {
-      result = await this._submitRecordTx(params, senderAddress, transactionPrivateKey, fee);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
-    }
+    result = await this._submitRecordTx(params, senderAddress, transactionPrivateKey, fee);
 
     return parseTxResponse(result);
   }
@@ -122,23 +110,17 @@ export class Registry {
    */
    async sendCoins(params: MessageSendParams, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createMessageSend(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createMessageSend(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -148,17 +130,11 @@ export class Registry {
    */
    async getNextBondId(address: string) {
     let result;
+    const { account } = await this.getAccount(address);
+    const accountObj = account.base_account;
 
-    try {
-      const { account } = await this.getAccount(address);
-      const accountObj = account.base_account;
-
-      const nextSeq = parseInt(accountObj.sequence, 10) + 1;
-      result = sha256(`${accountObj.address}:${accountObj.account_number}:${nextSeq}`);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
-    }
+    const nextSeq = parseInt(accountObj.sequence, 10) + 1;
+    result = sha256(`${accountObj.address}:${accountObj.account_number}:${nextSeq}`);
 
     return result;
   }
@@ -182,23 +158,17 @@ export class Registry {
    */
    async createBond(params: MessageMsgCreateBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgCreateBond(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgCreateBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -208,23 +178,17 @@ export class Registry {
    */
    async refillBond(params: MessageMsgRefillBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgRefillBond(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgRefillBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -234,23 +198,17 @@ export class Registry {
    */
    async withdrawBond(params: MessageMsgWithdrawBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgWithdrawBond(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgWithdrawBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -260,23 +218,17 @@ export class Registry {
    */
   async cancelBond(params: MessageMsgCancelBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgCancelBond(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgCancelBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -286,23 +238,17 @@ export class Registry {
    */
   async reserveAuthority(params: MessageMsgReserveAuthority, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgReserveAuthority(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgReserveAuthority(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -316,23 +262,17 @@ export class Registry {
    */
   async setAuthorityBond(params: MessageMsgSetAuthorityBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgSetAuthorityBond(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgSetAuthorityBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -353,23 +293,17 @@ export class Registry {
    */
   async setName(params: MessageMsgSetName, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgSetName(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgSetName(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -386,23 +320,17 @@ export class Registry {
    */
   async deleteName(params: MessageMsgDeleteName, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
-    try {
-      const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
-
-      const sender = {
-        accountAddress: accountInfo.address,
-        sequence: accountInfo.sequence,
-        accountNumber: accountInfo.account_number,
-        pubkey: accountInfo.pub_key.key,
-      }
-
-      const msg = createTxMsgDeleteName(this._chain, sender, fee, '', params)
-      result = await this._submitTx(msg, privateKey, sender);
-    } catch (err: any) {
-      const error = err[0] || err;
-      throw new Error(Registry.processWriteError(error));
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
     }
+
+    const msg = createTxMsgDeleteName(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
   }
@@ -478,6 +406,13 @@ export class Registry {
 
     // Submit Tx to chain.
     const { tx_response: response } = await this._client.submit(tx);
+
+    if (response.code !== 0) {
+      // Throw error when transaction is not successful.
+      // https://docs.starport.com/guide/nameservice/05-play.html#buy-name-transaction-details
+      throw new Error(Registry.processWriteError(response.raw_log))
+    }
+
     return response;
   }
 }

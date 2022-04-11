@@ -83,7 +83,6 @@ export class Util {
    * Get record content ID.
    */
    static async getContentId(record: any) {
-    console.log(record)
     const content = dagCBOR.util.serialize(record);
     const cid = await dagCBOR.util.cid(content);
 

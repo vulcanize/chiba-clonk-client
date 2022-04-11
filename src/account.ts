@@ -4,10 +4,11 @@ import * as ecc from 'tiny-secp256k1';
 import * as bip39 from 'bip39';
 import canonicalStringify from 'canonical-json';
 import secp256k1 from 'secp256k1';
+import { utils } from 'ethers';
 import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
-import { fromHex, toBech32, toHex } from '@cosmjs/encoding';
-import { rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+import { fromHex, toHex } from '@cosmjs/encoding';
+import { ethToEthermint } from "@tharsis/address-converter"
 
 import { Payload, Signature } from './types';
 import { sha256 } from 'js-sha256';
@@ -31,10 +32,10 @@ interface TypedMessageDomain {
 export class Account {
   _privateKey: Buffer
   _publicKey?: Uint8Array
-  _cosmosAddress?: string
   _formattedCosmosAddress?: string
   _registryPublicKey?: string
   _registryAddress?: string
+  _ethAddress?: string
 
   /**
    * Generate bip39 mnemonic.
@@ -90,11 +91,11 @@ export class Account {
     const compressed = Secp256k1.compressPubkey(keypair.pubkey);
     this._publicKey = compressed
 
-    // 2. Generate cosmos-sdk address.
-    this._cosmosAddress = new Ripemd160().update(keypair.pubkey).digest().toString();
+    // 2. Generate eth address.
+    this._ethAddress = utils.computeAddress(this._publicKey)
 
     // 3. Generate cosmos-sdk formatted address.
-    this._formattedCosmosAddress = toBech32('ethm', rawSecp256k1PubkeyToRawAddress(this._publicKey));
+    this._formattedCosmosAddress = ethToEthermint(this._ethAddress);
 
     // 4. Generate registry formatted public key.
     const publicKeyInHex = AMINO_PREFIX + toHex(this._publicKey);

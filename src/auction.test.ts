@@ -1,11 +1,9 @@
-import assert from 'assert';
-
 import { Registry, Account, createBid } from './index';
 import { getConfig } from './testing/helper';
 
 jest.setTimeout(30 * 60 * 1000);
 
-const { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } = getConfig();
+const { chainId, restEndpoint, gqlEndpoint, privateKey, fee } = getConfig();
 
 const auctionTests = (numBidders = 3) => {
   let registry: Registry;
@@ -25,19 +23,15 @@ const auctionTests = (numBidders = 3) => {
     for (let i = 0; i < numBidders; i++) {
       const mnenonic = Account.generateMnemonic();
       const account = await Account.generateFromMnemonic(mnenonic);
-      await account.init();
       const bidderAddress = account.formattedCosmosAddress;
-      assert(bidderAddress)
-      await registry.sendCoins({ denom: 'aphoton', amount: '1000000000', destinationAddress: bidderAddress }, accountAddress, privateKey, fee);
+      await registry.sendCoins({ denom: 'aphoton', amount: '1000000000', destinationAddress: bidderAddress }, privateKey, fee);
       accounts.push({ address: bidderAddress, privateKey: account.privateKey.toString('hex') });
     }
-
-    accounts[0] = { address: accountAddress, privateKey };
   });
 
   test('Reserve authority.', async () => {
     authorityName = `dxos-${Date.now()}`;
-    await registry.reserveAuthority({ name: authorityName, owner: accounts[0].address }, accounts[0].address, accounts[0].privateKey, fee);
+    await registry.reserveAuthority({ name: authorityName }, accounts[0].privateKey, fee);
   });
 
   test('Authority should be under auction.', async () => {
@@ -55,7 +49,7 @@ const auctionTests = (numBidders = 3) => {
   test('Commit bids.', async () => {
     for (let i = 0; i < numBidders; i++) {
       accounts[i].bid = await createBid(chainId, auctionId, accounts[i].address, `${10000000 + (i * 500)}aphoton`);
-      await registry.commitBid({ auctionId, commitHash: accounts[i].bid.commitHash }, accounts[i].address, accounts[i].privateKey, fee);
+      await registry.commitBid({ auctionId, commitHash: accounts[i].bid.commitHash }, accounts[i].privateKey, fee);
     }
   });
 
@@ -80,7 +74,7 @@ const auctionTests = (numBidders = 3) => {
 
     for (let i = 0; i < numBidders; i++) {
       // eslint-disable-next-line no-await-in-loop
-      await registry.revealBid({ auctionId, reveal: accounts[i].bid.revealString }, accounts[i].address, accounts[i].privateKey, fee);
+      await registry.revealBid({ auctionId, reveal: accounts[i].bid.revealString }, accounts[i].privateKey, fee);
     }
   });
 
@@ -132,6 +126,6 @@ if (!process.env.AUCTIONS_ENABLED) {
     yarn test:auctions
   */
   describe('Auction (1 bidder)', withNumBidders(1));
-  xdescribe('Auction (2 bidders)', withNumBidders(2));
-  xdescribe('Auction (4 bidders)', withNumBidders(4));
+  describe('Auction (2 bidders)', withNumBidders(2));
+  describe('Auction (4 bidders)', withNumBidders(4));
 }

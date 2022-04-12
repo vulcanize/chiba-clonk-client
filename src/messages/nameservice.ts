@@ -70,7 +70,8 @@ const MSG_DELETE_NAME_TYPES = {
 export const NAMESERVICE_ERRORS = [
   'Name already reserved.',
   'Authority bond not found.',
-  'Name authority not found.'
+  'Name authority not found.',
+  'Access denied.',
 ]
 
 export interface MessageMsgReserveAuthority {

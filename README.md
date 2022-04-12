@@ -16,14 +16,7 @@ Follow these steps to run the tests:
 
 - Run the chain using `./init.sh`.
 
-- Get the account details using:
-  ```bash
-  chibaclonkd keys list
-  ```
-
-- Use the address of key `mykey` and assign it to `ACCOUNT_ADDRESS` in the `.env` file.
-
-- To export the private key run:
+- Export the private key using:
 
   ```bash
   chibaclonkd keys export mykey --unarmored-hex --unsafe
@@ -31,11 +24,31 @@ Follow these steps to run the tests:
 
 - Copy the private key and assign it to variable `PRIVATE_KEY` in the `.env` file.
 
-- Run the test in chiba-clonk-client repo:
+- Run the tests in chiba-clonk-client repo:
 
   ```bash
   yarn test
   ```
+
+- Run the tests with auctions enabled
+
+  - In chiba-clonk repo run:
+
+    ```bash
+    AUCTION_ENABLED=true ./init.sh
+    ```
+
+  - Export the private key and change it in `.env` file again using:
+
+    ```bash
+    chibaclonkd keys export mykey --unarmored-hex --unsafe
+    ```
+
+  - Run tests:
+
+    ```bash
+    yarn test:auctions
+    ```
 
 ## Development
 

@@ -9,6 +9,7 @@ import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth
 import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
 import { fromHex, toHex } from '@cosmjs/encoding';
 import { ethToEthermint } from "@tharsis/address-converter"
+import { encodeSecp256k1Pubkey } from '@cosmjs/amino';
 
 import { Payload, Signature } from './types';
 import { sha256 } from 'js-sha256';
@@ -31,11 +32,12 @@ interface TypedMessageDomain {
  */
 export class Account {
   _privateKey: Buffer
-  _publicKey?: Uint8Array
-  _formattedCosmosAddress?: string
-  _registryPublicKey?: string
-  _registryAddress?: string
-  _ethAddress?: string
+  _publicKey!: Uint8Array
+  _encodedPubkey!: string
+  _formattedCosmosAddress!: string
+  _registryPublicKey!: string
+  _registryAddress!: string
+  _ethAddress!: string
 
   /**
    * Generate bip39 mnemonic.
@@ -66,10 +68,15 @@ export class Account {
     assert(privateKey);
 
     this._privateKey = privateKey;
+    this.init()
   }
 
   get privateKey() {
     return this._privateKey;
+  }
+
+  get encodedPubkey() {
+    return this._encodedPubkey;
   }
 
   get formattedCosmosAddress() {
@@ -84,12 +91,10 @@ export class Account {
     return this._registryAddress;
   }
 
-  async init () {
+  init () {
     // Generate public key.
-    const keypair = await Secp256k1.makeKeypair(this._privateKey);
-
-    const compressed = Secp256k1.compressPubkey(keypair.pubkey);
-    this._publicKey = compressed
+    this._publicKey = secp256k1.publicKeyCreate(this._privateKey)
+    this._encodedPubkey = encodeSecp256k1Pubkey(this._publicKey).value
 
     // 2. Generate eth address.
     this._ethAddress = utils.computeAddress(this._publicKey)

@@ -136,7 +136,7 @@ export class RegistryClient {
   /**
    * Fetch Account.
    */
-   async getAccount(address: string) {
+  async getAccount(address: string) {
     assert(address);
 
     let { data } = await axios.get(`${this._restEndpoint}${generateEndpointAccount(address)}`)
@@ -147,7 +147,7 @@ export class RegistryClient {
   /**
    * Get records by attributes.
    */
-   async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {
+  async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {
     if (!attributes) {
       attributes = {};
     }
@@ -179,7 +179,7 @@ export class RegistryClient {
   /**
    * Lookup authorities by names.
    */
-   async lookupAuthorities(names: string[], auction = false) {
+  async lookupAuthorities(names: string[], auction = false) {
     assert(names.length);
 
     const query = `query ($names: [String!]) {
@@ -201,6 +201,26 @@ export class RegistryClient {
     const result = await this._graph(query)(variables);
 
     return result['lookupAuthorities'];
+  }
+
+  /**
+   * Get auctions by ids.
+   */
+  async getAuctionsByIds(ids: string[]) {
+    assert(ids);
+    assert(ids.length);
+
+    const query = `query ($ids: [String!]) {
+      getAuctionsByIds(ids: $ids) {
+        ${auctionFields}
+      }
+    }`;
+
+    const variables = {
+      ids
+    };
+
+    return RegistryClient.getResult(this._graph(query)(variables), 'getAuctionsByIds');
   }
 
   /**

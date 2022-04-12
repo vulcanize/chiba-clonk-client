@@ -9,12 +9,40 @@ import {
   MessageSendParams
 } from '@tharsis/transactions'
 
-import { createTxMsgCancelBond, createTxMsgCreateBond, createTxMsgRefillBond, createTxMsgWithdrawBond, MessageMsgCancelBond, MessageMsgCreateBond, MessageMsgRefillBond, MessageMsgWithdrawBond } from "./messages/bond";
 import { RegistryClient } from "./registry-client";
 import { Account } from "./account";
 import { createTransaction } from "./txbuilder";
-import { createTxMsgDeleteName, createTxMsgReserveAuthority, createTxMsgSetAuthorityBond, createTxMsgSetName, createTxMsgSetRecord, MessageMsgDeleteName, MessageMsgReserveAuthority, MessageMsgSetAuthorityBond, MessageMsgSetName, MessageMsgSetRecord, NAMESERVICE_ERRORS } from './messages/nameservice';
 import { Payload, Record } from './types';
+import { Util } from './util';
+import {
+  createTxMsgCancelBond,
+  createTxMsgCreateBond,
+  createTxMsgRefillBond,
+  createTxMsgWithdrawBond,
+  MessageMsgCancelBond,
+  MessageMsgCreateBond,
+  MessageMsgRefillBond,
+  MessageMsgWithdrawBond
+} from "./messages/bond";
+import {
+  createTxMsgDeleteName,
+  createTxMsgReserveAuthority,
+  createTxMsgSetAuthorityBond,
+  createTxMsgSetName,
+  createTxMsgSetRecord,
+  MessageMsgDeleteName,
+  MessageMsgReserveAuthority,
+  MessageMsgSetAuthorityBond,
+  MessageMsgSetName,
+  MessageMsgSetRecord,
+  NAMESERVICE_ERRORS
+} from './messages/nameservice';
+import {
+  createTxMsgCommitBid,
+  createTxMsgRevealBid,
+  MessageMsgCommitBid,
+  MessageMsgRevealBid
+} from './messages/auction';
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
@@ -33,6 +61,32 @@ export const parseTxResponse = (result: any) => {
   });
 
   return { hash, height, ...txResponse };
+};
+
+/**
+ * Create an auction bid.
+ */
+ export const createBid = async (chainId: string, auctionId: string, bidderAddress: string, bidAmount: string, noise?: string) => {
+  if (!noise) {
+    noise = Account.generateMnemonic();
+  }
+
+  const reveal = {
+    chainId,
+    auctionId,
+    bidderAddress,
+    bidAmount,
+    noise
+  };
+
+  const commitHash = await Util.getContentId(reveal);
+  const revealString = Buffer.from(JSON.stringify(reveal)).toString('hex');
+
+  return {
+    commitHash,
+    reveal,
+    revealString
+  };
 };
 
 export const isKeyValid = (key: string) => key && key.match(/^[0-9a-fA-F]{64}$/);
@@ -71,7 +125,7 @@ export class Registry {
   /**
    * Get account by addresses.
    */
-   async getAccount(address: string) {
+  async getAccount(address: string) {
     return this._client.getAccount(address);
   }
 
@@ -108,7 +162,7 @@ export class Registry {
   /**
    * Send coins.
    */
-   async sendCoins(params: MessageSendParams, senderAddress: string, privateKey: string, fee: Fee) {
+  async sendCoins(params: MessageSendParams, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
     const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
@@ -128,7 +182,7 @@ export class Registry {
   /**
    * Computes the next bondId for the given account private key.
    */
-   async getNextBondId(address: string) {
+  async getNextBondId(address: string) {
     let result;
     const { account } = await this.getAccount(address);
     const accountObj = account.base_account;
@@ -142,21 +196,21 @@ export class Registry {
   /**
    * Get bonds by ids.
    */
-   async getBondsByIds(ids: string[]) {
+  async getBondsByIds(ids: string[]) {
     return this._client.getBondsByIds(ids);
   }
 
   /**
    * Query bonds by attributes.
    */
-   async queryBonds(attributes = {}) {
+  async queryBonds(attributes = {}) {
     return this._client.queryBonds(attributes);
   }
 
   /**
    * Create bond.
    */
-   async createBond(params: MessageMsgCreateBond, senderAddress: string, privateKey: string, fee: Fee) {
+  async createBond(params: MessageMsgCreateBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
     const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
@@ -176,7 +230,7 @@ export class Registry {
   /**
    * Refill bond.
    */
-   async refillBond(params: MessageMsgRefillBond, senderAddress: string, privateKey: string, fee: Fee) {
+  async refillBond(params: MessageMsgRefillBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
     const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
@@ -196,7 +250,7 @@ export class Registry {
   /**
    * Withdraw (from) bond.
    */
-   async withdrawBond(params: MessageMsgWithdrawBond, senderAddress: string, privateKey: string, fee: Fee) {
+  async withdrawBond(params: MessageMsgWithdrawBond, senderAddress: string, privateKey: string, fee: Fee) {
     let result;
     const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
 
@@ -275,6 +329,53 @@ export class Registry {
     result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);
+  }
+
+  /**
+   * Commit auction bid.
+   */
+  async commitBid(params: MessageMsgCommitBid, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
+    }
+
+    const msg = createTxMsgCommitBid(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Reveal auction bid.
+   */
+   async revealBid(params: MessageMsgRevealBid, senderAddress: string, privateKey: string, fee: Fee) {
+    let result;
+    const { account: { base_account: accountInfo } } = await this.getAccount(senderAddress);
+
+    const sender = {
+      accountAddress: accountInfo.address,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.account_number,
+      pubkey: accountInfo.pub_key.key,
+    }
+
+    const msg = createTxMsgRevealBid(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Get records by ids.
+   */
+  async getAuctionsByIds(ids: string[]) {
+    return this._client.getAuctionsByIds(ids);
   }
 
   /**

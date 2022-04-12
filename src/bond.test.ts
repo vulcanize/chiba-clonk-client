@@ -1,7 +1,7 @@
 import { Registry } from './index';
 import { getConfig } from './testing/helper';
 
-const { chainId, restEndpoint, gqlEndpoint, privateKey, accountAddress, fee } = getConfig();
+const { chainId, restEndpoint, gqlEndpoint, privateKey, fee } = getConfig();
 
 jest.setTimeout(90 * 1000);
 
@@ -16,9 +16,9 @@ const bondTests = () => {
   });
 
   test('Create bond.', async () => {
-    bondId1 = await registry.getNextBondId(accountAddress);
+    bondId1 = await registry.getNextBondId(privateKey);
     expect(bondId1).toBeDefined();
-    await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, accountAddress, privateKey, fee);
+    await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, privateKey, fee);
   })
 
   test('Get bond by ID.', async () => {
@@ -45,7 +45,7 @@ const bondTests = () => {
   });
 
   test('Refill bond.', async () => {
-    await registry.refillBond({ id: bondId1, denom: 'aphoton', amount: '500' }, accountAddress, privateKey, fee);
+    await registry.refillBond({ id: bondId1, denom: 'aphoton', amount: '500' }, privateKey, fee);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond).toBeDefined();
@@ -55,7 +55,7 @@ const bondTests = () => {
   });
 
   test('Withdraw bond.', async () => {
-    await registry.withdrawBond({ id: bondId1, denom: 'aphoton', amount: '500' }, accountAddress, privateKey, fee);
+    await registry.withdrawBond({ id: bondId1, denom: 'aphoton', amount: '500' }, privateKey, fee);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond).toBeDefined();
@@ -65,7 +65,7 @@ const bondTests = () => {
   });
 
   test('Cancel bond.', async () => {
-    await registry.cancelBond({ id: bondId1 }, accountAddress, privateKey, fee);
+    await registry.cancelBond({ id: bondId1 }, privateKey, fee);
 
     const [bond] = await registry.getBondsByIds([bondId1]);
     expect(bond.id).toBe("");

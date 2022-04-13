@@ -1,13 +1,10 @@
 import assert from 'assert';
 import path from 'path';
-import semver from 'semver';
 
 import { Account } from './account';
 import { Registry } from './index';
-import { getBaseConfig, getConfig } from './testing/helper';
+import { ensureUpdatedConfig, getBaseConfig, getConfig } from './testing/helper';
 
-const WATCHER_1_ID = 'bafyreif7z4lbftuxkj7nu4bl7xihitqvhus3wmoqdkjo7lwv24j6fkfskm'
-const WATCHER_2_ID = 'bafyreiaplz7n2bddg3xhkeuiavwnku7xta2s2cfyaza37ytv4vw367exo4'
 const WATCHER_YML_PATH = path.join(__dirname, './testing/data/watcher.yml');
 
 jest.setTimeout(120 * 1000);
@@ -35,9 +32,8 @@ const namingTests = () => {
     await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, privateKey, fee);
 
     // Create bot.
-    // TODO: Use ensureUpdatedConfig from helper.
-    watcher = await getBaseConfig(WATCHER_YML_PATH);
-    const result = await registry.setRecord(
+    watcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
+    await registry.setRecord(
       {
         privateKey,
         bondId,
@@ -47,9 +43,8 @@ const namingTests = () => {
       fee
     )
 
-    // TODO: Get id from setRecord response.
-    // watcherId = result.data;
-    watcherId = WATCHER_1_ID;
+    const [record] = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
+    watcherId = record.id;
   });
 
   test('Reserve authority.', async () => {
@@ -127,8 +122,7 @@ const namingTests = () => {
     // Query records should return it (some WRN points to it).
     const records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version });
     expect(records).toBeDefined();
-    // TODO: Fix queryRecords to return filtered results.
-    // expect(records).toHaveLength(1);
+    expect(records).toHaveLength(1);
   });
 
   test('Lookup name', async () => {
@@ -154,10 +148,8 @@ const namingTests = () => {
   });
 
   test('Lookup name with history', async () => {
-    // TODO: Use ensureUpdatedConfig from helper.
-    const updatedWatcher = await getBaseConfig(WATCHER_YML_PATH);
-    updatedWatcher.record.version = semver.inc(updatedWatcher.record.version, 'patch');
-    const result = await registry.setRecord(
+    const updatedWatcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
+    await registry.setRecord(
       {
         privateKey,
         bondId,
@@ -167,9 +159,8 @@ const namingTests = () => {
       fee
     )
 
-    // TODO: Get id from setRecord response.
-    // const updatedWatcherId = result.data;
-    const updatedWatcherId = WATCHER_2_ID;
+    const [record] = await registry.queryRecords({ type: 'watcher', version: updatedWatcher.record.version }, true);
+    const updatedWatcherId = record.id;
     await registry.setName({ wrn, cid: updatedWatcherId }, privateKey, fee);
 
     const records = await registry.lookupNames([wrn], true);
@@ -242,13 +233,12 @@ const namingTests = () => {
     // Query records should NOT return it (no WRN points to it).
     records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version });
     expect(records).toBeDefined();
-    // TODO: Fix queryRecords to return filtered results.
-    // expect(records).toHaveLength(0);
+    expect(records).toHaveLength(0);
 
     // Query all records should return it (all: true).
     records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
     expect(records).toBeDefined();
-    // expect(records).toHaveLength(1);
+    expect(records).toHaveLength(1);
   });
 
   test('Delete already deleted name', async () => {

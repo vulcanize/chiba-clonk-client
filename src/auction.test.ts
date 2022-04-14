@@ -73,7 +73,6 @@ const auctionTests = (numBidders = 3) => {
     expect(auction.status).toEqual('reveal');
 
     for (let i = 0; i < numBidders; i++) {
-      // eslint-disable-next-line no-await-in-loop
       await registry.revealBid({ auctionId, reveal: accounts[i].bid.revealString }, accounts[i].privateKey, fee);
     }
   });

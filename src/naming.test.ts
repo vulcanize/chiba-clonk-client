@@ -3,7 +3,7 @@ import path from 'path';
 
 import { Account } from './account';
 import { Registry } from './index';
-import { ensureUpdatedConfig, getBaseConfig, getConfig } from './testing/helper';
+import { ensureUpdatedConfig, getConfig } from './testing/helper';
 
 const WATCHER_YML_PATH = path.join(__dirname, './testing/data/watcher.yml');
 

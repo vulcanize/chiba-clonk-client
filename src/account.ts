@@ -5,14 +5,14 @@ import * as bip39 from 'bip39';
 import canonicalStringify from 'canonical-json';
 import secp256k1 from 'secp256k1';
 import { utils } from 'ethers';
+import { sha256 } from 'js-sha256';
 import { MessageTypes, signTypedData, SignTypedDataVersion } from '@metamask/eth-sig-util';
-import { Ripemd160, Secp256k1 } from "@cosmjs/crypto";
+import { Ripemd160 } from "@cosmjs/crypto";
 import { fromHex, toHex } from '@cosmjs/encoding';
 import { ethToEthermint } from "@tharsis/address-converter"
 import { encodeSecp256k1Pubkey } from '@cosmjs/amino';
 
 import { Payload, Signature } from './types';
-import { sha256 } from 'js-sha256';
 
 const AMINO_PREFIX = 'EB5AE98721';
 const HDPATH = "m/44'/60'/0'/0";
@@ -120,7 +120,6 @@ export class Account {
 
   /**
    * Get record signature.
-   * @param {object} record
    */
   async signRecord(record: any) {
     assert(record);

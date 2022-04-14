@@ -320,10 +320,6 @@ export class Registry {
 
   /**
    * Set authority bond.
-   * @param {string} name
-   * @param {string} bondId
-   * @param {string} privateKey
-   * @param {object} fee
    */
   async setAuthorityBond(params: MessageMsgSetAuthorityBond, privateKey: string, fee: Fee) {
     let result;
@@ -401,10 +397,6 @@ export class Registry {
 
   /**
    * Set name (WRN) to record ID (CID).
-   * @param {string} wrn
-   * @param {string} id
-   * @param {string} privateKey
-   * @param {object} fee
    */
   async setName(params: MessageMsgSetName, privateKey: string, fee: Fee) {
     let result;

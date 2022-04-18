@@ -21,7 +21,7 @@ export const getConfig = () => {
   assert(process.env.PRIVATE_KEY);
 
   return {
-    chainId: process.env.CHIBA_CLONK_CHAIN_ID || 'chibaclonk_9000-1',
+    chainId: process.env.COSMOS_CHAIN_ID || 'chibaclonk_9000-1',
     privateKey: process.env.PRIVATE_KEY,
     restEndpoint: process.env.CHIBA_CLONK_REST_ENDPOINT || 'http://localhost:1317',
     gqlEndpoint: process.env.CHIBA_CLONK_GQL_ENDPOINT || 'http://localhost:9473/api',

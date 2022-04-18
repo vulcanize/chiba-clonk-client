@@ -117,7 +117,7 @@ if (!process.env.AUCTIONS_ENABLED) {
   /**
     Running these tests requires name auctions enabled. In chiba-clonk repo run:
 
-    AUCTION_ENABLED=true ./init.sh
+    TEST_AUCTION_ENABLED=true ./init.sh
 
 
     Run tests:

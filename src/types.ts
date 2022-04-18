@@ -34,16 +34,14 @@ export class Record {
    * Serialize record.
    */
   serialize() {
-    // return Util.sortJSON({
-    // });
     return {
       'id': '_',
       'bond_id': '_',
       'create_time': '_',
       'expiry_time': '_',
+      // Setting deleted as false (zero value) throws error in EIP712 signature verification.
       'deleted': true,
       'attributes': this.attributes,
-      // 'owners': [],
     }
   }
 

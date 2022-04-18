@@ -46,8 +46,6 @@ import {
 
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
-export const DEFAULT_CHAIN_ID = 'chibaclonk_9000-1';
-
 // Parse Tx response from cosmos-sdk.
 export const parseTxResponse = (result: any) => {
   const { txhash: hash, height, ...txResponse } = result;
@@ -97,6 +95,7 @@ export class Registry {
   _client: RegistryClient
 
   static processWriteError(error: string) {
+    console.log("error", error)
     // error string a stacktrace containing the message.
     // https://gist.github.com/nikugogoi/de55d390574ded3466abad8bffd81952#file-txresponse-js-L7
     const errorMessage = NAMESERVICE_ERRORS.find(message => error.includes(message))
@@ -104,7 +103,7 @@ export class Registry {
     return errorMessage || DEFAULT_WRITE_ERROR;
   }
 
-  constructor(restUrl: string, gqlUrl: string, cosmosChainId = DEFAULT_CHAIN_ID) {
+  constructor(restUrl: string, gqlUrl: string, chainId: string) {
     if (!isUrl(restUrl)) {
       throw new Error('Path to a REST endpoint should be provided.');
     }
@@ -117,9 +116,9 @@ export class Registry {
     this._client = new RegistryClient(restUrl, gqlUrl);
 
     this._chain = {
-      chainId: 9000,
-      cosmosChainId
-    }
+      cosmosChainId: chainId,
+      chainId: this._parseEthChainId(chainId)
+    };
   }
 
   /**
@@ -308,7 +307,6 @@ export class Registry {
 
     const msgParams = {
       name: params.name,
-      // TODO: Pass empty string as owner.
       owner: params.owner || sender.accountAddress
     }
 
@@ -522,6 +520,16 @@ export class Registry {
     }
 
     return response;
+  }
+
+  /**
+   * https://evmos.dev/basics/chain_id.html
+   */
+  _parseEthChainId (chainId: string) {
+    const [ idWithChainNumber ] = chainId.split('-')
+    const [ _, ethChainId ] = idWithChainNumber.split('_')
+
+    return Number(ethChainId)
   }
 }
 

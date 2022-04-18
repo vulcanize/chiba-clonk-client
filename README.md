@@ -35,7 +35,7 @@ Follow these steps to run the tests:
   - In chiba-clonk repo run:
 
     ```bash
-    AUCTION_ENABLED=true ./init.sh
+    TEST_AUCTION_ENABLED=true ./init.sh
     ```
 
   - Export the private key and change it in `.env` file again using:

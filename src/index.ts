@@ -95,7 +95,6 @@ export class Registry {
   _client: RegistryClient
 
   static processWriteError(error: string) {
-    console.log("error", error)
     // error string a stacktrace containing the message.
     // https://gist.github.com/nikugogoi/de55d390574ded3466abad8bffd81952#file-txresponse-js-L7
     const errorMessage = NAMESERVICE_ERRORS.find(message => error.includes(message))

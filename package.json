@@ -41,7 +41,8 @@
   },
   "scripts": {
     "test": "jest --runInBand --verbose",
-    "test:auctions": "AUCTIONS_ENABLED=1 jest --runInBand --verbose",
+    "test:auctions": "TEST_AUCTIONS_ENABLED=1 jest --runInBand --verbose src/auction.test.ts",
+    "test:expiry": "TEST_NAMESERVICE_EXPIRY=1 jest --runInBand --verbose src/nameservice-expiry.test.ts",
     "build": "tsc"
   }
 }

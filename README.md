@@ -50,6 +50,26 @@ Follow these steps to run the tests:
     yarn test:auctions
     ```
 
+- Run the tests for record and authority expiry
+
+  - In chiba-clonk repo run:
+
+    ```bash
+    TEST_NAMESERVICE_EXPIRY=true ./init.sh
+    ```
+
+  - Export the private key and change it in `.env` file again using:
+
+    ```bash
+    chibaclonkd keys export mykey --unarmored-hex --unsafe
+    ```
+
+  - Run tests:
+
+    ```bash
+    yarn test:expiry
+    ```
+
 ## Development
 
 [README](./DEVELOPMENT.md)

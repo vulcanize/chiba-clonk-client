@@ -110,7 +110,7 @@ const auctionTests = (numBidders = 3) => {
 
 const withNumBidders = (numBidders: number) => () => auctionTests(numBidders);
 
-if (!process.env.AUCTIONS_ENABLED) {
+if (!process.env.TEST_AUCTIONS_ENABLED) {
   // Required as jest complains if file has no tests.
   test('skipping auction tests', () => {});
 } else {

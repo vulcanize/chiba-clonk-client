@@ -31,7 +31,7 @@ const namingTests = () => {
     bondId = await registry.getNextBondId(privateKey);
     await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, privateKey, fee);
 
-    // Create bot.
+    // Create watcher.
     watcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
     await registry.setRecord(
       {
@@ -267,7 +267,7 @@ const namingTests = () => {
   });
 };
 
-if (process.env.AUCTIONS_ENABLED) {
+if (process.env.TEST_AUCTIONS_ENABLED) {
   // Required as jest complains if file has no tests.
   test('skipping naming tests', () => {});
 } else {

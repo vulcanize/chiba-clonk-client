@@ -24,7 +24,7 @@ const utilTests = () => {
     bondId = await registry.getNextBondId(privateKey);
     await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, privateKey, fee);
 
-    // Create bot.
+    // Create watcher.
     watcher = await getBaseConfig(WATCHER_YML_PATH);
     await registry.setRecord(
       {

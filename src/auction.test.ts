@@ -30,7 +30,7 @@ const auctionTests = (numBidders = 3) => {
   });
 
   test('Reserve authority.', async () => {
-    authorityName = `dxos-${Date.now()}`;
+    authorityName = `chiba-clonk-${Date.now()}`;
     await registry.reserveAuthority({ name: authorityName }, accounts[0].privateKey, fee);
   });
 

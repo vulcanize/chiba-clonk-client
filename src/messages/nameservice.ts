@@ -22,7 +22,7 @@ const MSG_RESERVE_AUTHORITY_TYPES = {
 
 const MSG_SET_NAME_TYPES = {
   MsgValue: [
-    { name: 'wrn', type: 'string' },
+    { name: 'crn', type: 'string' },
     { name: 'cid', type: 'string' },
     { name: 'signer', type: 'string' },
   ],
@@ -62,7 +62,7 @@ const MSG_SET_AUTHORITY_BOND_TYPES = {
 
 const MSG_DELETE_NAME_TYPES = {
   MsgValue: [
-    { name: 'wrn', type: 'string' },
+    { name: 'crn', type: 'string' },
     { name: 'signer', type: 'string' },
   ],
 }
@@ -80,7 +80,7 @@ export interface MessageMsgReserveAuthority {
 }
 
 export interface MessageMsgSetName {
-  wrn: string
+  crn: string
   cid: string
 }
 
@@ -95,7 +95,7 @@ export interface MessageMsgSetAuthorityBond {
 }
 
 export interface MessageMsgDeleteName {
-  wrn: string
+  crn: string
 }
 
 export function createTxMsgReserveAuthority(
@@ -132,13 +132,13 @@ export function createTxMsgSetName(
   const types = generateTypes(MSG_SET_NAME_TYPES)
 
   const msg = createMsgSetName(
-    params.wrn,
+    params.crn,
     params.cid,
     sender.accountAddress
   )
 
   const msgCosmos = protoCreateMsgSetName(
-    params.wrn,
+    params.crn,
     params.cid,
     sender.accountAddress
   )
@@ -204,12 +204,12 @@ export function createTxMsgDeleteName(
   const types = generateTypes(MSG_DELETE_NAME_TYPES)
 
   const msg = createMsgDeleteName(
-    params.wrn,
+    params.crn,
     sender.accountAddress
   )
 
   const msgCosmos = protoCreateMsgDeleteName(
-    params.wrn,
+    params.crn,
     sender.accountAddress
   )
 
@@ -249,14 +249,14 @@ const protoCreateMsgReserveAuthority = (
 }
 
 function createMsgSetName(
-  wrn: string,
+  crn: string,
   cid: string,
   signer: string
 ) {
   return {
     type: 'nameservice/SetName',
     value: {
-      wrn,
+      crn,
       cid,
       signer
     },
@@ -264,12 +264,12 @@ function createMsgSetName(
 }
 
 const protoCreateMsgSetName = (
-  wrn: string,
+  crn: string,
   cid: string,
   signer: string
 ) => {
   const setNameMessage = new nameserviceTx.vulcanize.nameservice.v1beta1.MsgSetName({
-    wrn,
+    crn,
     cid,
     signer,
   })
@@ -358,24 +358,24 @@ const protoCreateMsgSetAuthorityBond = (
 }
 
 function createMsgDeleteName(
-  wrn: string,
+  crn: string,
   signer: string
 ) {
   return {
     type: 'nameservice/DeleteAuthority',
     value: {
-      wrn,
+      crn,
       signer
     },
   }
 }
 
 const protoCreateMsgDeleteName = (
-  wrn: string,
+  crn: string,
   signer: string
 ) => {
   const deleteNameAutorityMessage = new nameserviceTx.vulcanize.nameservice.v1beta1.MsgDeleteNameAuthority({
-    wrn,
+    crn,
     signer,
   })
 

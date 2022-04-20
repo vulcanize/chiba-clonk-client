@@ -393,7 +393,7 @@ export class Registry {
   }
 
   /**
-   * Set name (WRN) to record ID (CID).
+   * Set name (CRN) to record ID (CID).
    */
   async setName(params: MessageMsgSetName, privateKey: string, fee: Fee) {
     let result;
@@ -421,7 +421,7 @@ export class Registry {
   }
 
   /**
-   * Delete name (WRN) mapping.
+   * Delete name (CRN) mapping.
    */
   async deleteName(params: MessageMsgDeleteName, privateKey: string, fee: Fee) {
     let result;

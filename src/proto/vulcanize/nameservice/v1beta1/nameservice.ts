@@ -316,9 +316,10 @@ export namespace vulcanize.nameservice.v1beta1 {
             deleted?: boolean;
             owners?: string[];
             attributes?: string;
+            names?: string[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [6], []);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [6, 8], []);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("id" in data && data.id != undefined) {
                     this.id = data.id;
@@ -340,6 +341,9 @@ export namespace vulcanize.nameservice.v1beta1 {
                 }
                 if ("attributes" in data && data.attributes != undefined) {
                     this.attributes = data.attributes;
+                }
+                if ("names" in data && data.names != undefined) {
+                    this.names = data.names;
                 }
             }
         }
@@ -385,6 +389,12 @@ export namespace vulcanize.nameservice.v1beta1 {
         set attributes(value: string) {
             pb_1.Message.setField(this, 7, value);
         }
+        get names() {
+            return pb_1.Message.getField(this, 8) as string[];
+        }
+        set names(value: string[]) {
+            pb_1.Message.setField(this, 8, value);
+        }
         static fromObject(data: {
             id?: string;
             bond_id?: string;
@@ -393,6 +403,7 @@ export namespace vulcanize.nameservice.v1beta1 {
             deleted?: boolean;
             owners?: string[];
             attributes?: string;
+            names?: string[];
         }) {
             const message = new Record({});
             if (data.id != null) {
@@ -416,6 +427,9 @@ export namespace vulcanize.nameservice.v1beta1 {
             if (data.attributes != null) {
                 message.attributes = data.attributes;
             }
+            if (data.names != null) {
+                message.names = data.names;
+            }
             return message;
         }
         toObject() {
@@ -427,6 +441,7 @@ export namespace vulcanize.nameservice.v1beta1 {
                 deleted?: boolean;
                 owners?: string[];
                 attributes?: string;
+                names?: string[];
             } = {};
             if (this.id != null) {
                 data.id = this.id;
@@ -449,6 +464,9 @@ export namespace vulcanize.nameservice.v1beta1 {
             if (this.attributes != null) {
                 data.attributes = this.attributes;
             }
+            if (this.names != null) {
+                data.names = this.names;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -469,6 +487,8 @@ export namespace vulcanize.nameservice.v1beta1 {
                 writer.writeRepeatedString(6, this.owners);
             if (typeof this.attributes === "string" && this.attributes.length)
                 writer.writeString(7, this.attributes);
+            if (this.names !== undefined)
+                writer.writeRepeatedString(8, this.names);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -498,6 +518,9 @@ export namespace vulcanize.nameservice.v1beta1 {
                         break;
                     case 7:
                         message.attributes = reader.readString();
+                        break;
+                    case 8:
+                        pb_1.Message.addToRepeatedField(message, 8, reader.readString());
                         break;
                     default: reader.skipField();
                 }

@@ -50,7 +50,7 @@ const nameserviceExpiryTests = () => {
   })
 
   test('Reserve authority and set bond', async () => {
-    authorityName = `dxos-${Date.now()}`;
+    authorityName = `chiba-clonk-${Date.now()}`;
     await registry.reserveAuthority({ name: authorityName }, privateKey, fee);
     await registry.setAuthorityBond({ name: authorityName, bondId }, privateKey, fee);
     const [authority] = await registry.lookupAuthorities([authorityName]);

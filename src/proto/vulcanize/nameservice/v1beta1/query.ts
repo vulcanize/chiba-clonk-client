@@ -119,26 +119,54 @@ export namespace vulcanize.nameservice.v1beta1 {
     }
     export class QueryListRecordsRequest extends pb_1.Message {
         constructor(data?: any[] | {
+            attributes?: QueryListRecordsRequest.KeyValueInput[];
+            all?: boolean;
             pagination?: dependency_3.cosmos.base.query.v1beta1.PageRequest;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], []);
             if (!Array.isArray(data) && typeof data == "object") {
+                if ("attributes" in data && data.attributes != undefined) {
+                    this.attributes = data.attributes;
+                }
+                if ("all" in data && data.all != undefined) {
+                    this.all = data.all;
+                }
                 if ("pagination" in data && data.pagination != undefined) {
                     this.pagination = data.pagination;
                 }
             }
         }
+        get attributes() {
+            return pb_1.Message.getRepeatedWrapperField(this, QueryListRecordsRequest.KeyValueInput, 1) as QueryListRecordsRequest.KeyValueInput[];
+        }
+        set attributes(value: QueryListRecordsRequest.KeyValueInput[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get all() {
+            return pb_1.Message.getField(this, 2) as boolean;
+        }
+        set all(value: boolean) {
+            pb_1.Message.setField(this, 2, value);
+        }
         get pagination() {
-            return pb_1.Message.getWrapperField(this, dependency_3.cosmos.base.query.v1beta1.PageRequest, 1) as dependency_3.cosmos.base.query.v1beta1.PageRequest;
+            return pb_1.Message.getWrapperField(this, dependency_3.cosmos.base.query.v1beta1.PageRequest, 3) as dependency_3.cosmos.base.query.v1beta1.PageRequest;
         }
         set pagination(value: dependency_3.cosmos.base.query.v1beta1.PageRequest) {
-            pb_1.Message.setWrapperField(this, 1, value);
+            pb_1.Message.setWrapperField(this, 3, value);
         }
         static fromObject(data: {
+            attributes?: ReturnType<typeof QueryListRecordsRequest.KeyValueInput.prototype.toObject>[];
+            all?: boolean;
             pagination?: ReturnType<typeof dependency_3.cosmos.base.query.v1beta1.PageRequest.prototype.toObject>;
         }) {
             const message = new QueryListRecordsRequest({});
+            if (data.attributes != null) {
+                message.attributes = data.attributes.map(item => QueryListRecordsRequest.KeyValueInput.fromObject(item));
+            }
+            if (data.all != null) {
+                message.all = data.all;
+            }
             if (data.pagination != null) {
                 message.pagination = dependency_3.cosmos.base.query.v1beta1.PageRequest.fromObject(data.pagination);
             }
@@ -146,8 +174,16 @@ export namespace vulcanize.nameservice.v1beta1 {
         }
         toObject() {
             const data: {
+                attributes?: ReturnType<typeof QueryListRecordsRequest.KeyValueInput.prototype.toObject>[];
+                all?: boolean;
                 pagination?: ReturnType<typeof dependency_3.cosmos.base.query.v1beta1.PageRequest.prototype.toObject>;
             } = {};
+            if (this.attributes != null) {
+                data.attributes = this.attributes.map((item: QueryListRecordsRequest.KeyValueInput) => item.toObject());
+            }
+            if (this.all != null) {
+                data.all = this.all;
+            }
             if (this.pagination != null) {
                 data.pagination = this.pagination.toObject();
             }
@@ -157,8 +193,12 @@ export namespace vulcanize.nameservice.v1beta1 {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
+            if (this.attributes !== undefined)
+                writer.writeRepeatedMessage(1, this.attributes, (item: QueryListRecordsRequest.KeyValueInput) => item.serialize(writer));
+            if (this.all !== undefined)
+                writer.writeBool(2, this.all);
             if (this.pagination !== undefined)
-                writer.writeMessage(1, this.pagination, () => this.pagination.serialize(writer));
+                writer.writeMessage(3, this.pagination, () => this.pagination.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -169,6 +209,12 @@ export namespace vulcanize.nameservice.v1beta1 {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
+                        reader.readMessage(message.attributes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, QueryListRecordsRequest.KeyValueInput.deserialize(reader), QueryListRecordsRequest.KeyValueInput));
+                        break;
+                    case 2:
+                        message.all = reader.readBool();
+                        break;
+                    case 3:
                         reader.readMessage(message.pagination, () => message.pagination = dependency_3.cosmos.base.query.v1beta1.PageRequest.deserialize(reader));
                         break;
                     default: reader.skipField();
@@ -181,6 +227,367 @@ export namespace vulcanize.nameservice.v1beta1 {
         }
         static deserializeBinary(bytes: Uint8Array): QueryListRecordsRequest {
             return QueryListRecordsRequest.deserialize(bytes);
+        }
+    }
+    export namespace QueryListRecordsRequest {
+        export class ReferenceInput extends pb_1.Message {
+            constructor(data?: any[] | {
+                id?: string;
+            }) {
+                super();
+                pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
+                if (!Array.isArray(data) && typeof data == "object") {
+                    if ("id" in data && data.id != undefined) {
+                        this.id = data.id;
+                    }
+                }
+            }
+            get id() {
+                return pb_1.Message.getField(this, 1) as string;
+            }
+            set id(value: string) {
+                pb_1.Message.setField(this, 1, value);
+            }
+            static fromObject(data: {
+                id?: string;
+            }) {
+                const message = new ReferenceInput({});
+                if (data.id != null) {
+                    message.id = data.id;
+                }
+                return message;
+            }
+            toObject() {
+                const data: {
+                    id?: string;
+                } = {};
+                if (this.id != null) {
+                    data.id = this.id;
+                }
+                return data;
+            }
+            serialize(): Uint8Array;
+            serialize(w: pb_1.BinaryWriter): void;
+            serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+                const writer = w || new pb_1.BinaryWriter();
+                if (typeof this.id === "string" && this.id.length)
+                    writer.writeString(1, this.id);
+                if (!w)
+                    return writer.getResultBuffer();
+            }
+            static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ReferenceInput {
+                const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ReferenceInput();
+                while (reader.nextField()) {
+                    if (reader.isEndGroup())
+                        break;
+                    switch (reader.getFieldNumber()) {
+                        case 1:
+                            message.id = reader.readString();
+                            break;
+                        default: reader.skipField();
+                    }
+                }
+                return message;
+            }
+            serializeBinary(): Uint8Array {
+                return this.serialize();
+            }
+            static deserializeBinary(bytes: Uint8Array): ReferenceInput {
+                return ReferenceInput.deserialize(bytes);
+            }
+        }
+        export class ValueInput extends pb_1.Message {
+            constructor(data?: any[] | {
+                type?: string;
+                string?: string;
+                int?: number;
+                float?: number;
+                boolean?: boolean;
+                reference?: QueryListRecordsRequest.ReferenceInput;
+                values?: QueryListRecordsRequest.ValueInput[];
+            }) {
+                super();
+                pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7], []);
+                if (!Array.isArray(data) && typeof data == "object") {
+                    if ("type" in data && data.type != undefined) {
+                        this.type = data.type;
+                    }
+                    if ("string" in data && data.string != undefined) {
+                        this.string = data.string;
+                    }
+                    if ("int" in data && data.int != undefined) {
+                        this.int = data.int;
+                    }
+                    if ("float" in data && data.float != undefined) {
+                        this.float = data.float;
+                    }
+                    if ("boolean" in data && data.boolean != undefined) {
+                        this.boolean = data.boolean;
+                    }
+                    if ("reference" in data && data.reference != undefined) {
+                        this.reference = data.reference;
+                    }
+                    if ("values" in data && data.values != undefined) {
+                        this.values = data.values;
+                    }
+                }
+            }
+            get type() {
+                return pb_1.Message.getField(this, 1) as string;
+            }
+            set type(value: string) {
+                pb_1.Message.setField(this, 1, value);
+            }
+            get string() {
+                return pb_1.Message.getField(this, 2) as string;
+            }
+            set string(value: string) {
+                pb_1.Message.setField(this, 2, value);
+            }
+            get int() {
+                return pb_1.Message.getField(this, 3) as number;
+            }
+            set int(value: number) {
+                pb_1.Message.setField(this, 3, value);
+            }
+            get float() {
+                return pb_1.Message.getField(this, 4) as number;
+            }
+            set float(value: number) {
+                pb_1.Message.setField(this, 4, value);
+            }
+            get boolean() {
+                return pb_1.Message.getField(this, 5) as boolean;
+            }
+            set boolean(value: boolean) {
+                pb_1.Message.setField(this, 5, value);
+            }
+            get reference() {
+                return pb_1.Message.getWrapperField(this, QueryListRecordsRequest.ReferenceInput, 6) as QueryListRecordsRequest.ReferenceInput;
+            }
+            set reference(value: QueryListRecordsRequest.ReferenceInput) {
+                pb_1.Message.setWrapperField(this, 6, value);
+            }
+            get values() {
+                return pb_1.Message.getRepeatedWrapperField(this, QueryListRecordsRequest.ValueInput, 7) as QueryListRecordsRequest.ValueInput[];
+            }
+            set values(value: QueryListRecordsRequest.ValueInput[]) {
+                pb_1.Message.setRepeatedWrapperField(this, 7, value);
+            }
+            static fromObject(data: {
+                type?: string;
+                string?: string;
+                int?: number;
+                float?: number;
+                boolean?: boolean;
+                reference?: ReturnType<typeof QueryListRecordsRequest.ReferenceInput.prototype.toObject>;
+                values?: ReturnType<typeof QueryListRecordsRequest.ValueInput.prototype.toObject>[];
+            }) {
+                const message = new ValueInput({});
+                if (data.type != null) {
+                    message.type = data.type;
+                }
+                if (data.string != null) {
+                    message.string = data.string;
+                }
+                if (data.int != null) {
+                    message.int = data.int;
+                }
+                if (data.float != null) {
+                    message.float = data.float;
+                }
+                if (data.boolean != null) {
+                    message.boolean = data.boolean;
+                }
+                if (data.reference != null) {
+                    message.reference = QueryListRecordsRequest.ReferenceInput.fromObject(data.reference);
+                }
+                if (data.values != null) {
+                    message.values = data.values.map(item => QueryListRecordsRequest.ValueInput.fromObject(item));
+                }
+                return message;
+            }
+            toObject() {
+                const data: {
+                    type?: string;
+                    string?: string;
+                    int?: number;
+                    float?: number;
+                    boolean?: boolean;
+                    reference?: ReturnType<typeof QueryListRecordsRequest.ReferenceInput.prototype.toObject>;
+                    values?: ReturnType<typeof QueryListRecordsRequest.ValueInput.prototype.toObject>[];
+                } = {};
+                if (this.type != null) {
+                    data.type = this.type;
+                }
+                if (this.string != null) {
+                    data.string = this.string;
+                }
+                if (this.int != null) {
+                    data.int = this.int;
+                }
+                if (this.float != null) {
+                    data.float = this.float;
+                }
+                if (this.boolean != null) {
+                    data.boolean = this.boolean;
+                }
+                if (this.reference != null) {
+                    data.reference = this.reference.toObject();
+                }
+                if (this.values != null) {
+                    data.values = this.values.map((item: QueryListRecordsRequest.ValueInput) => item.toObject());
+                }
+                return data;
+            }
+            serialize(): Uint8Array;
+            serialize(w: pb_1.BinaryWriter): void;
+            serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+                const writer = w || new pb_1.BinaryWriter();
+                if (typeof this.type === "string" && this.type.length)
+                    writer.writeString(1, this.type);
+                if (typeof this.string === "string" && this.string.length)
+                    writer.writeString(2, this.string);
+                if (this.int !== undefined)
+                    writer.writeInt64(3, this.int);
+                if (this.float !== undefined)
+                    writer.writeDouble(4, this.float);
+                if (this.boolean !== undefined)
+                    writer.writeBool(5, this.boolean);
+                if (this.reference !== undefined)
+                    writer.writeMessage(6, this.reference, () => this.reference.serialize(writer));
+                if (this.values !== undefined)
+                    writer.writeRepeatedMessage(7, this.values, (item: QueryListRecordsRequest.ValueInput) => item.serialize(writer));
+                if (!w)
+                    return writer.getResultBuffer();
+            }
+            static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ValueInput {
+                const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ValueInput();
+                while (reader.nextField()) {
+                    if (reader.isEndGroup())
+                        break;
+                    switch (reader.getFieldNumber()) {
+                        case 1:
+                            message.type = reader.readString();
+                            break;
+                        case 2:
+                            message.string = reader.readString();
+                            break;
+                        case 3:
+                            message.int = reader.readInt64();
+                            break;
+                        case 4:
+                            message.float = reader.readDouble();
+                            break;
+                        case 5:
+                            message.boolean = reader.readBool();
+                            break;
+                        case 6:
+                            reader.readMessage(message.reference, () => message.reference = QueryListRecordsRequest.ReferenceInput.deserialize(reader));
+                            break;
+                        case 7:
+                            reader.readMessage(message.values, () => pb_1.Message.addToRepeatedWrapperField(message, 7, QueryListRecordsRequest.ValueInput.deserialize(reader), QueryListRecordsRequest.ValueInput));
+                            break;
+                        default: reader.skipField();
+                    }
+                }
+                return message;
+            }
+            serializeBinary(): Uint8Array {
+                return this.serialize();
+            }
+            static deserializeBinary(bytes: Uint8Array): ValueInput {
+                return ValueInput.deserialize(bytes);
+            }
+        }
+        export class KeyValueInput extends pb_1.Message {
+            constructor(data?: any[] | {
+                key?: string;
+                value?: QueryListRecordsRequest.ValueInput;
+            }) {
+                super();
+                pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
+                if (!Array.isArray(data) && typeof data == "object") {
+                    if ("key" in data && data.key != undefined) {
+                        this.key = data.key;
+                    }
+                    if ("value" in data && data.value != undefined) {
+                        this.value = data.value;
+                    }
+                }
+            }
+            get key() {
+                return pb_1.Message.getField(this, 1) as string;
+            }
+            set key(value: string) {
+                pb_1.Message.setField(this, 1, value);
+            }
+            get value() {
+                return pb_1.Message.getWrapperField(this, QueryListRecordsRequest.ValueInput, 2) as QueryListRecordsRequest.ValueInput;
+            }
+            set value(value: QueryListRecordsRequest.ValueInput) {
+                pb_1.Message.setWrapperField(this, 2, value);
+            }
+            static fromObject(data: {
+                key?: string;
+                value?: ReturnType<typeof QueryListRecordsRequest.ValueInput.prototype.toObject>;
+            }) {
+                const message = new KeyValueInput({});
+                if (data.key != null) {
+                    message.key = data.key;
+                }
+                if (data.value != null) {
+                    message.value = QueryListRecordsRequest.ValueInput.fromObject(data.value);
+                }
+                return message;
+            }
+            toObject() {
+                const data: {
+                    key?: string;
+                    value?: ReturnType<typeof QueryListRecordsRequest.ValueInput.prototype.toObject>;
+                } = {};
+                if (this.key != null) {
+                    data.key = this.key;
+                }
+                if (this.value != null) {
+                    data.value = this.value.toObject();
+                }
+                return data;
+            }
+            serialize(): Uint8Array;
+            serialize(w: pb_1.BinaryWriter): void;
+            serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+                const writer = w || new pb_1.BinaryWriter();
+                if (typeof this.key === "string" && this.key.length)
+                    writer.writeString(1, this.key);
+                if (this.value !== undefined)
+                    writer.writeMessage(2, this.value, () => this.value.serialize(writer));
+                if (!w)
+                    return writer.getResultBuffer();
+            }
+            static deserialize(bytes: Uint8Array | pb_1.BinaryReader): KeyValueInput {
+                const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new KeyValueInput();
+                while (reader.nextField()) {
+                    if (reader.isEndGroup())
+                        break;
+                    switch (reader.getFieldNumber()) {
+                        case 1:
+                            message.key = reader.readString();
+                            break;
+                        case 2:
+                            reader.readMessage(message.value, () => message.value = QueryListRecordsRequest.ValueInput.deserialize(reader));
+                            break;
+                        default: reader.skipField();
+                    }
+                }
+                return message;
+            }
+            serializeBinary(): Uint8Array {
+                return this.serialize();
+            }
+            static deserializeBinary(bytes: Uint8Array): KeyValueInput {
+                return KeyValueInput.deserialize(bytes);
+            }
         }
     }
     export class QueryListRecordsResponse extends pb_1.Message {
@@ -1063,39 +1470,39 @@ export namespace vulcanize.nameservice.v1beta1 {
             return QueryWhoisResponse.deserialize(bytes);
         }
     }
-    export class QueryLookupWrn extends pb_1.Message {
+    export class QueryLookupCrn extends pb_1.Message {
         constructor(data?: any[] | {
-            wrn?: string;
+            crn?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("wrn" in data && data.wrn != undefined) {
-                    this.wrn = data.wrn;
+                if ("crn" in data && data.crn != undefined) {
+                    this.crn = data.crn;
                 }
             }
         }
-        get wrn() {
+        get crn() {
             return pb_1.Message.getField(this, 1) as string;
         }
-        set wrn(value: string) {
+        set crn(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         static fromObject(data: {
-            wrn?: string;
+            crn?: string;
         }) {
-            const message = new QueryLookupWrn({});
-            if (data.wrn != null) {
-                message.wrn = data.wrn;
+            const message = new QueryLookupCrn({});
+            if (data.crn != null) {
+                message.crn = data.crn;
             }
             return message;
         }
         toObject() {
             const data: {
-                wrn?: string;
+                crn?: string;
             } = {};
-            if (this.wrn != null) {
-                data.wrn = this.wrn;
+            if (this.crn != null) {
+                data.crn = this.crn;
             }
             return data;
         }
@@ -1103,19 +1510,19 @@ export namespace vulcanize.nameservice.v1beta1 {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (typeof this.wrn === "string" && this.wrn.length)
-                writer.writeString(1, this.wrn);
+            if (typeof this.crn === "string" && this.crn.length)
+                writer.writeString(1, this.crn);
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryLookupWrn {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryLookupWrn();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryLookupCrn {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryLookupCrn();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.wrn = reader.readString();
+                        message.crn = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -1125,11 +1532,11 @@ export namespace vulcanize.nameservice.v1beta1 {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): QueryLookupWrn {
-            return QueryLookupWrn.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): QueryLookupCrn {
+            return QueryLookupCrn.deserialize(bytes);
         }
     }
-    export class QueryLookupWrnResponse extends pb_1.Message {
+    export class QueryLookupCrnResponse extends pb_1.Message {
         constructor(data?: any[] | {
             name?: dependency_1.vulcanize.nameservice.v1beta1.NameRecord;
         }) {
@@ -1150,7 +1557,7 @@ export namespace vulcanize.nameservice.v1beta1 {
         static fromObject(data: {
             name?: ReturnType<typeof dependency_1.vulcanize.nameservice.v1beta1.NameRecord.prototype.toObject>;
         }) {
-            const message = new QueryLookupWrnResponse({});
+            const message = new QueryLookupCrnResponse({});
             if (data.name != null) {
                 message.name = dependency_1.vulcanize.nameservice.v1beta1.NameRecord.fromObject(data.name);
             }
@@ -1174,8 +1581,8 @@ export namespace vulcanize.nameservice.v1beta1 {
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryLookupWrnResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryLookupWrnResponse();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryLookupCrnResponse {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryLookupCrnResponse();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -1191,43 +1598,43 @@ export namespace vulcanize.nameservice.v1beta1 {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): QueryLookupWrnResponse {
-            return QueryLookupWrnResponse.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): QueryLookupCrnResponse {
+            return QueryLookupCrnResponse.deserialize(bytes);
         }
     }
-    export class QueryResolveWrn extends pb_1.Message {
+    export class QueryResolveCrn extends pb_1.Message {
         constructor(data?: any[] | {
-            wrn?: string;
+            crn?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("wrn" in data && data.wrn != undefined) {
-                    this.wrn = data.wrn;
+                if ("crn" in data && data.crn != undefined) {
+                    this.crn = data.crn;
                 }
             }
         }
-        get wrn() {
+        get crn() {
             return pb_1.Message.getField(this, 1) as string;
         }
-        set wrn(value: string) {
+        set crn(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         static fromObject(data: {
-            wrn?: string;
+            crn?: string;
         }) {
-            const message = new QueryResolveWrn({});
-            if (data.wrn != null) {
-                message.wrn = data.wrn;
+            const message = new QueryResolveCrn({});
+            if (data.crn != null) {
+                message.crn = data.crn;
             }
             return message;
         }
         toObject() {
             const data: {
-                wrn?: string;
+                crn?: string;
             } = {};
-            if (this.wrn != null) {
-                data.wrn = this.wrn;
+            if (this.crn != null) {
+                data.crn = this.crn;
             }
             return data;
         }
@@ -1235,19 +1642,19 @@ export namespace vulcanize.nameservice.v1beta1 {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (typeof this.wrn === "string" && this.wrn.length)
-                writer.writeString(1, this.wrn);
+            if (typeof this.crn === "string" && this.crn.length)
+                writer.writeString(1, this.crn);
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryResolveWrn {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryResolveWrn();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryResolveCrn {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryResolveCrn();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.wrn = reader.readString();
+                        message.crn = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -1257,11 +1664,11 @@ export namespace vulcanize.nameservice.v1beta1 {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): QueryResolveWrn {
-            return QueryResolveWrn.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): QueryResolveCrn {
+            return QueryResolveCrn.deserialize(bytes);
         }
     }
-    export class QueryResolveWrnResponse extends pb_1.Message {
+    export class QueryResolveCrnResponse extends pb_1.Message {
         constructor(data?: any[] | {
             record?: dependency_1.vulcanize.nameservice.v1beta1.Record;
         }) {
@@ -1282,7 +1689,7 @@ export namespace vulcanize.nameservice.v1beta1 {
         static fromObject(data: {
             record?: ReturnType<typeof dependency_1.vulcanize.nameservice.v1beta1.Record.prototype.toObject>;
         }) {
-            const message = new QueryResolveWrnResponse({});
+            const message = new QueryResolveCrnResponse({});
             if (data.record != null) {
                 message.record = dependency_1.vulcanize.nameservice.v1beta1.Record.fromObject(data.record);
             }
@@ -1306,8 +1713,8 @@ export namespace vulcanize.nameservice.v1beta1 {
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryResolveWrnResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryResolveWrnResponse();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryResolveCrnResponse {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryResolveCrnResponse();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -1323,8 +1730,8 @@ export namespace vulcanize.nameservice.v1beta1 {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): QueryResolveWrnResponse {
-            return QueryResolveWrnResponse.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): QueryResolveCrnResponse {
+            return QueryResolveCrnResponse.deserialize(bytes);
         }
     }
     export class QueryGetRecordExpiryQueue extends pb_1.Message {

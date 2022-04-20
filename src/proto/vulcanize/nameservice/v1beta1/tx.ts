@@ -251,15 +251,15 @@ export namespace vulcanize.nameservice.v1beta1 {
     }
     export class MsgSetName extends pb_1.Message {
         constructor(data?: any[] | {
-            wrn?: string;
+            crn?: string;
             cid?: string;
             signer?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("wrn" in data && data.wrn != undefined) {
-                    this.wrn = data.wrn;
+                if ("crn" in data && data.crn != undefined) {
+                    this.crn = data.crn;
                 }
                 if ("cid" in data && data.cid != undefined) {
                     this.cid = data.cid;
@@ -269,10 +269,10 @@ export namespace vulcanize.nameservice.v1beta1 {
                 }
             }
         }
-        get wrn() {
+        get crn() {
             return pb_1.Message.getField(this, 1) as string;
         }
-        set wrn(value: string) {
+        set crn(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         get cid() {
@@ -288,13 +288,13 @@ export namespace vulcanize.nameservice.v1beta1 {
             pb_1.Message.setField(this, 3, value);
         }
         static fromObject(data: {
-            wrn?: string;
+            crn?: string;
             cid?: string;
             signer?: string;
         }) {
             const message = new MsgSetName({});
-            if (data.wrn != null) {
-                message.wrn = data.wrn;
+            if (data.crn != null) {
+                message.crn = data.crn;
             }
             if (data.cid != null) {
                 message.cid = data.cid;
@@ -306,12 +306,12 @@ export namespace vulcanize.nameservice.v1beta1 {
         }
         toObject() {
             const data: {
-                wrn?: string;
+                crn?: string;
                 cid?: string;
                 signer?: string;
             } = {};
-            if (this.wrn != null) {
-                data.wrn = this.wrn;
+            if (this.crn != null) {
+                data.crn = this.crn;
             }
             if (this.cid != null) {
                 data.cid = this.cid;
@@ -325,8 +325,8 @@ export namespace vulcanize.nameservice.v1beta1 {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (typeof this.wrn === "string" && this.wrn.length)
-                writer.writeString(1, this.wrn);
+            if (typeof this.crn === "string" && this.crn.length)
+                writer.writeString(1, this.crn);
             if (typeof this.cid === "string" && this.cid.length)
                 writer.writeString(2, this.cid);
             if (typeof this.signer === "string" && this.signer.length)
@@ -341,7 +341,7 @@ export namespace vulcanize.nameservice.v1beta1 {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.wrn = reader.readString();
+                        message.crn = reader.readString();
                         break;
                     case 2:
                         message.cid = reader.readString();
@@ -704,24 +704,24 @@ export namespace vulcanize.nameservice.v1beta1 {
     }
     export class MsgDeleteNameAuthority extends pb_1.Message {
         constructor(data?: any[] | {
-            wrn?: string;
+            crn?: string;
             signer?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("wrn" in data && data.wrn != undefined) {
-                    this.wrn = data.wrn;
+                if ("crn" in data && data.crn != undefined) {
+                    this.crn = data.crn;
                 }
                 if ("signer" in data && data.signer != undefined) {
                     this.signer = data.signer;
                 }
             }
         }
-        get wrn() {
+        get crn() {
             return pb_1.Message.getField(this, 1) as string;
         }
-        set wrn(value: string) {
+        set crn(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         get signer() {
@@ -731,12 +731,12 @@ export namespace vulcanize.nameservice.v1beta1 {
             pb_1.Message.setField(this, 2, value);
         }
         static fromObject(data: {
-            wrn?: string;
+            crn?: string;
             signer?: string;
         }) {
             const message = new MsgDeleteNameAuthority({});
-            if (data.wrn != null) {
-                message.wrn = data.wrn;
+            if (data.crn != null) {
+                message.crn = data.crn;
             }
             if (data.signer != null) {
                 message.signer = data.signer;
@@ -745,11 +745,11 @@ export namespace vulcanize.nameservice.v1beta1 {
         }
         toObject() {
             const data: {
-                wrn?: string;
+                crn?: string;
                 signer?: string;
             } = {};
-            if (this.wrn != null) {
-                data.wrn = this.wrn;
+            if (this.crn != null) {
+                data.crn = this.crn;
             }
             if (this.signer != null) {
                 data.signer = this.signer;
@@ -760,8 +760,8 @@ export namespace vulcanize.nameservice.v1beta1 {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (typeof this.wrn === "string" && this.wrn.length)
-                writer.writeString(1, this.wrn);
+            if (typeof this.crn === "string" && this.crn.length)
+                writer.writeString(1, this.crn);
             if (typeof this.signer === "string" && this.signer.length)
                 writer.writeString(2, this.signer);
             if (!w)
@@ -774,7 +774,7 @@ export namespace vulcanize.nameservice.v1beta1 {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.wrn = reader.readString();
+                        message.crn = reader.readString();
                         break;
                     case 2:
                         message.signer = reader.readString();

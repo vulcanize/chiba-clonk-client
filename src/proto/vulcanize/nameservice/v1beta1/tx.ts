@@ -122,23 +122,47 @@ export namespace vulcanize.nameservice.v1beta1 {
         }
     }
     export class MsgSetRecordResponse extends pb_1.Message {
-        constructor(data?: any[] | {}) {
+        constructor(data?: any[] | {
+            id?: string;
+        }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], []);
-            if (!Array.isArray(data) && typeof data == "object") { }
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("id" in data && data.id != undefined) {
+                    this.id = data.id;
+                }
+            }
         }
-        static fromObject(data: {}) {
+        get id() {
+            return pb_1.Message.getField(this, 1) as string;
+        }
+        set id(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            id?: string;
+        }) {
             const message = new MsgSetRecordResponse({});
+            if (data.id != null) {
+                message.id = data.id;
+            }
             return message;
         }
         toObject() {
-            const data: {} = {};
+            const data: {
+                id?: string;
+            } = {};
+            if (this.id != null) {
+                data.id = this.id;
+            }
             return data;
         }
         serialize(): Uint8Array;
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
+            if (typeof this.id === "string" && this.id.length)
+                writer.writeString(1, this.id);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -148,6 +172,9 @@ export namespace vulcanize.nameservice.v1beta1 {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.id = reader.readString();
+                        break;
                     default: reader.skipField();
                 }
             }

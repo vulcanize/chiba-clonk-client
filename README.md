@@ -73,3 +73,14 @@ Follow these steps to run the tests:
 ## Development
 
 [README](./DEVELOPMENT.md)
+
+## Known Issues
+
+- [Util](./src/util.ts) `getContentId` method does not generate same CID compared to that in chiba-clonk.
+
+- Passing a float type value in [watcher attributes](./src/testing/data/watcher.yml) throws error when sending setRecord message.
+  ```
+  failed to execute message; message index: 0: Invalid signature.: unauthorized
+  ```
+
+- When sending setRecord message, an integer value passed in watcher attributes is parsed as float type in chiba-clonk while [unmarshalling json](https://pkg.go.dev/encoding/json#Unmarshal).

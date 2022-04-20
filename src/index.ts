@@ -35,7 +35,8 @@ import {
   MessageMsgSetAuthorityBond,
   MessageMsgSetName,
   MessageMsgSetRecord,
-  NAMESERVICE_ERRORS
+  NAMESERVICE_ERRORS,
+  parseMsgSetRecordResponse
 } from './messages/nameservice';
 import {
   createTxMsgCommitBid,
@@ -47,9 +48,12 @@ import {
 const DEFAULT_WRITE_ERROR = 'Unable to write to chiba-clonk.';
 
 // Parse Tx response from cosmos-sdk.
-export const parseTxResponse = (result: any) => {
+export const parseTxResponse = (result: any, parseResponse?: (data: string) => any) => {
   const { txhash: hash, height, ...txResponse } = result;
-  txResponse.data = txResponse.data && Buffer.from(txResponse.data, 'base64').toString('utf8');
+
+  if (parseResponse) {
+    txResponse.data = parseResponse(txResponse.data)
+  }
 
   txResponse.events.forEach((event:any) => {
     event.attributes = event.attributes.map(({ key, value }: { key: string, value: string }) => ({
@@ -64,7 +68,7 @@ export const parseTxResponse = (result: any) => {
 /**
  * Create an auction bid.
  */
- export const createBid = async (chainId: string, auctionId: string, bidderAddress: string, bidAmount: string, noise?: string) => {
+export const createBid = async (chainId: string, auctionId: string, bidderAddress: string, bidAmount: string, noise?: string) => {
   if (!noise) {
     noise = Account.generateMnemonic();
   }
@@ -153,7 +157,7 @@ export class Registry {
     let result;
     result = await this._submitRecordTx(params, transactionPrivateKey, fee);
 
-    return parseTxResponse(result);
+    return parseTxResponse(result, parseMsgSetRecordResponse);
   }
 
   /**

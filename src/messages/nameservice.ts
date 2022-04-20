@@ -67,6 +67,19 @@ const MSG_DELETE_NAME_TYPES = {
   ],
 }
 
+export const parseMsgSetRecordResponse = (data: string) => {
+  const responseBytes = Buffer.from(data, 'hex')
+
+  // TODO: Decode response using protobuf.
+  // const msgSetRecordResponse = nameserviceTx.vulcanize.nameservice.v1beta1.MsgSetRecordResponse.deserialize(responseBytes);
+  // return msgSetRecordResponse.toObject();
+
+  // Workaround as proto based decoding is not working.
+  const [_, id] = responseBytes.toString().split(';')
+
+  return { id }
+}
+
 export const NAMESERVICE_ERRORS = [
   'Name already reserved.',
   'Authority bond not found.',

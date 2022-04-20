@@ -26,7 +26,7 @@ const utilTests = () => {
 
     // Create watcher.
     watcher = await getBaseConfig(WATCHER_YML_PATH);
-    await registry.setRecord(
+    const result = await registry.setRecord(
       {
         privateKey,
         bondId,
@@ -36,8 +36,7 @@ const utilTests = () => {
       fee
     )
 
-    const [record] = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
-    watcherId = record.id;
+    watcherId = result.data.id;
   });
 
   xtest('generate content id.', async () => {

@@ -33,7 +33,7 @@ const namingTests = () => {
 
     // Create watcher.
     watcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
-    await registry.setRecord(
+    const result = await registry.setRecord(
       {
         privateKey,
         bondId,
@@ -43,8 +43,7 @@ const namingTests = () => {
       fee
     )
 
-    const [record] = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
-    watcherId = record.id;
+    watcherId = result.data.id;
   });
 
   test('Reserve authority.', async () => {
@@ -149,7 +148,7 @@ const namingTests = () => {
 
   test('Lookup name with history', async () => {
     const updatedWatcher = await ensureUpdatedConfig(WATCHER_YML_PATH);
-    await registry.setRecord(
+    const result = await registry.setRecord(
       {
         privateKey,
         bondId,
@@ -159,8 +158,7 @@ const namingTests = () => {
       fee
     )
 
-    const [record] = await registry.queryRecords({ type: 'watcher', version: updatedWatcher.record.version }, true);
-    const updatedWatcherId = record.id;
+    const updatedWatcherId = result.data.id;
     await registry.setName({ crn: crn, cid: updatedWatcherId }, privateKey, fee);
 
     const records = await registry.lookupNames([crn], true);

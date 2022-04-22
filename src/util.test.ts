@@ -39,7 +39,7 @@ const utilTests = () => {
     watcherId = result.data.id;
   });
 
-  xtest('generate content id.', async () => {
+  test('Generate content id.', async () => {
     const cid = await Util.getContentId(watcher.record);
     expect(cid).toBe(watcherId)
   });

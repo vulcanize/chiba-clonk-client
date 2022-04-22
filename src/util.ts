@@ -1,4 +1,7 @@
-import dagCBOR from 'ipld-dag-cbor';
+import * as Block from 'multiformats/block'
+import { sha256 as hasher } from 'multiformats/hashes/sha2'
+import * as dagCBOR from '@ipld/dag-cbor'
+import * as dagJSON from '@ipld/dag-json'
 
 /**
  * Utils
@@ -82,10 +85,16 @@ export class Util {
   /**
    * Get record content ID.
    */
-   static async getContentId(record: any) {
-    const content = dagCBOR.util.serialize(record);
-    const cid = await dagCBOR.util.cid(content);
+  static async getContentId(record: any) {
+    const serialized = dagJSON.encode(record)
+    const recordData = dagJSON.decode(serialized)
 
-    return cid.toString();
+    const block = await Block.encode({
+      value: recordData,
+      codec: dagCBOR,
+      hasher
+    })
+
+    return block.cid.toString();
   }
 }

@@ -86,12 +86,12 @@ const nameserviceExpiryTests = () => {
     setTimeout(done, 60 * 1000);
   });
 
-  test('Check record deleted without balance', async() => {
+  test('Check record deleted without bond balance', async() => {
     const records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version }, true);
     expect(records).toHaveLength(0);
   })
 
-  test('Check authority expired without balance', async() => {
+  test('Check authority expired without bond balance', async() => {
     const [authority] = await registry.lookupAuthorities([authorityName]);
     expect(authority.status).toBe('expired');
   })
@@ -109,7 +109,7 @@ if (!process.env.TEST_NAMESERVICE_EXPIRY) {
 
     Run tests:
 
-    yarn test:expiry
+    yarn test:nameservice-expiry
   */
 
   describe('Nameservice Expiry', nameserviceExpiryTests)

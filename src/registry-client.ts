@@ -133,15 +133,32 @@ export class RegistryClient {
     });
   }
 
+
   /**
-   * Fetch Account.
+   * Fetch Accounts.
    */
-  async getAccount(address: string) {
-    assert(address);
+  async getAccounts(addresses: string[]) {
+    assert(addresses);
+    assert(addresses.length);
 
-    let { data } = await axios.get(`${this._restEndpoint}${generateEndpointAccount(address)}`)
+    const query = `query ($addresses: [String!]) {
+      getAccounts(addresses: $addresses) {
+        address
+        pubKey
+        number
+        sequence
+        balance {
+          type
+          quantity
+        }
+      }
+    }`;
 
-    return data
+    const variables = {
+      addresses
+    };
+
+    return RegistryClient.getResult(this._graph(query)(variables), 'getAccounts');
   }
 
   /**

@@ -125,10 +125,10 @@ export class Registry {
   }
 
   /**
-   * Get account by addresses.
+   * Get accounts by addresses.
    */
-  async getAccount(address: string) {
-    return this._client.getAccount(address);
+  async getAccounts(addresses: string[]) {
+    return this._client.getAccounts(addresses);
   }
 
   /**
@@ -166,14 +166,7 @@ export class Registry {
   async sendCoins(params: MessageSendParams, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createMessageSend(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -187,10 +180,14 @@ export class Registry {
   async getNextBondId(privateKey: string) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountObj } } = await this.getAccount(account.formattedCosmosAddress);
+    const accounts = await this.getAccounts([account.formattedCosmosAddress]);
+    if (!accounts.length) {
+      throw new Error('Account does not exist.');
+    }
 
+    const [accountObj] = accounts;
     const nextSeq = parseInt(accountObj.sequence, 10) + 1;
-    result = sha256(`${accountObj.address}:${accountObj.account_number}:${nextSeq}`);
+    result = sha256(`${accountObj.address}:${accountObj.number}:${nextSeq}`);
 
     return result;
   }
@@ -215,14 +212,7 @@ export class Registry {
   async createBond(params: MessageMsgCreateBond, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgCreateBond(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -236,14 +226,7 @@ export class Registry {
   async refillBond(params: MessageMsgRefillBond, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgRefillBond(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -257,14 +240,7 @@ export class Registry {
   async withdrawBond(params: MessageMsgWithdrawBond, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgWithdrawBond(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -278,14 +254,7 @@ export class Registry {
   async cancelBond(params: MessageMsgCancelBond, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgCancelBond(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -299,14 +268,7 @@ export class Registry {
   async reserveAuthority(params: { name: string, owner?: string }, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msgParams = {
       name: params.name,
@@ -325,14 +287,7 @@ export class Registry {
   async setAuthorityBond(params: MessageMsgSetAuthorityBond, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgSetAuthorityBond(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -346,14 +301,7 @@ export class Registry {
   async commitBid(params: MessageMsgCommitBid, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgCommitBid(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -367,14 +315,7 @@ export class Registry {
   async revealBid(params: MessageMsgRevealBid, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgRevealBid(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -402,14 +343,7 @@ export class Registry {
   async setName(params: MessageMsgSetName, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgSetName(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -430,14 +364,7 @@ export class Registry {
   async deleteName(params: MessageMsgDeleteName, privateKey: string, fee: Fee) {
     let result;
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgDeleteName(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
@@ -483,14 +410,7 @@ export class Registry {
     }
 
     const account = new Account(Buffer.from(privateKey, 'hex'));
-    const { account: { base_account: accountInfo } } = await this.getAccount(account.formattedCosmosAddress);
-
-    const sender = {
-      accountAddress: account.formattedCosmosAddress,
-      sequence: accountInfo.sequence,
-      accountNumber: accountInfo.account_number,
-      pubkey: account.encodedPubkey,
-    }
+    const sender = await this._getSender(account);
 
     const msg = createTxMsgSetRecord(this._chain, sender, fee, '', params)
     return this._submitTx(msg, privateKey, sender);
@@ -499,7 +419,7 @@ export class Registry {
   /**
    * Submit a generic Tx to the chain.
    */
-   async _submitTx(message: any, privateKey: string, sender: Sender) {
+  async _submitTx(message: any, privateKey: string, sender: Sender) {
     // Check private key.
     if (!isKeyValid(privateKey)) {
       throw new Error('Registry privateKey should be a hex string.');
@@ -533,6 +453,25 @@ export class Registry {
     const [ _, ethChainId ] = idWithChainNumber.split('_')
 
     return Number(ethChainId)
+  }
+
+  /**
+   * Get sender used for creating message.
+   */
+  async _getSender (account: Account) {
+    const accounts = await this.getAccounts([account.formattedCosmosAddress]);
+    if (!accounts.length) {
+      throw new Error('Account does not exist.');
+    }
+
+    const [{ number, sequence }] = accounts;
+
+    return {
+      accountAddress: account.formattedCosmosAddress,
+      sequence: sequence,
+      accountNumber: number,
+      pubkey: account.encodedPubkey,
+    }
   }
 }
 

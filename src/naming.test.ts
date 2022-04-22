@@ -107,7 +107,7 @@ const namingTests = () => {
   test('Set name for unbonded authority', async () => {
     crn = `crn://${authorityName}/app/test`;
     assert(watcherId)
-    await expect(registry.setName({ crn: crn, cid: watcherId }, privateKey, fee)).rejects.toThrow('Authority bond not found.');
+    await expect(registry.setName({ crn, cid: watcherId }, privateKey, fee)).rejects.toThrow('Authority bond not found.');
   });
 
   test('Set authority bond', async () => {
@@ -116,7 +116,7 @@ const namingTests = () => {
 
   test('Set name', async () => {
     crn = `crn://${authorityName}/app/test`;
-    await registry.setName({ crn: crn, cid: watcherId }, privateKey, fee);
+    await registry.setName({ crn, cid: watcherId }, privateKey, fee);
 
     // Query records should return it (some CRN points to it).
     const records = await registry.queryRecords({ type: 'watcher', version: watcher.record.version });
@@ -159,7 +159,7 @@ const namingTests = () => {
     )
 
     const updatedWatcherId = result.data.id;
-    await registry.setName({ crn: crn, cid: updatedWatcherId }, privateKey, fee);
+    await registry.setName({ crn, cid: updatedWatcherId }, privateKey, fee);
 
     const records = await registry.lookupNames([crn], true);
     expect(records).toHaveLength(1);
@@ -216,7 +216,7 @@ const namingTests = () => {
   });
 
   test('Delete name', async () => {
-    await registry.deleteName({ crn: crn }, privateKey, fee);
+    await registry.deleteName({ crn }, privateKey, fee);
 
     let records = await registry.lookupNames([crn], true);
     expect(records).toBeDefined();
@@ -240,7 +240,7 @@ const namingTests = () => {
   });
 
   test('Delete already deleted name', async () => {
-    await registry.deleteName({ crn: crn }, privateKey, fee);
+    await registry.deleteName({ crn }, privateKey, fee);
 
     const records = await registry.lookupNames([crn], true);
     expect(records).toBeDefined();

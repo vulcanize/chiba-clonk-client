@@ -132,6 +132,13 @@ export class Registry {
   }
 
   /**
+   * Get records by ids.
+   */
+  async getRecordsByIds(ids: string[], refs = false) {
+    return this._client.getRecordsByIds(ids, refs);
+  }
+
+  /**
    * Get records by attributes.
    */
   async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {

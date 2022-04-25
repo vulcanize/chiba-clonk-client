@@ -162,6 +162,33 @@ export class RegistryClient {
   }
 
   /**
+   * Get records by ids.
+   */
+  async getRecordsByIds(ids: string[], refs = false) {
+    assert(ids);
+    assert(ids.length);
+
+    const query = `query ($ids: [String!]) {
+      getRecordsByIds(ids: $ids) {
+        id
+        names
+        owners
+        bondId
+        createTime
+        expiryTime
+        ${attributeField}
+        ${refs ? refsField : ''}
+      }
+    }`;
+
+    const variables = {
+      ids
+    };
+
+    return RegistryClient.getResult(this._graph(query)(variables), 'getRecordsByIds', RegistryClient.prepareAttributes('attributes'));
+  }
+
+  /**
    * Get records by attributes.
    */
   async queryRecords(attributes: {[key: string]: any}, all = false, refs = false) {

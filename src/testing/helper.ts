@@ -1,6 +1,9 @@
 import assert from 'assert';
 import yaml from 'node-yaml';
 import semver from 'semver';
+import { Fee } from '@tharsis/transactions';
+
+import { Registry } from '../index';
 
 export const ensureUpdatedConfig = async (path: string) => {
   const conf = await yaml.read(path);
@@ -15,6 +18,19 @@ export const getBaseConfig = async (path: string) => {
   conf.record.version = '0.0.1';
 
   return conf;
+};
+
+/**
+ * Provision a bond for record registration.
+ */
+export const provisionBondId = async (registry: Registry, privateKey: string, fee: Fee) => {
+  let bonds = await registry.queryBonds();
+  if (!bonds.length) {
+    await registry.createBond({ denom: 'uwire', amount: '1000000000' }, privateKey, fee);
+    bonds = await registry.queryBonds();
+  }
+
+  return bonds[0].id;
 };
 
 export const getConfig = () => {

@@ -133,6 +133,51 @@ export class RegistryClient {
     });
   }
 
+  /**
+   * Get server status.
+   */
+  async getStatus() {
+    const query = `query {
+      getStatus {
+        version
+        node {
+          id
+          network
+          moniker
+        }
+        sync {
+          latest_block_hash
+          latest_block_height
+          latest_block_time
+          catching_up
+        }
+        validator {
+          address
+          voting_power
+        }
+        validators {
+          address
+          voting_power
+          proposer_priority
+        }
+        num_peers
+        peers {
+          node {
+            id
+            network
+            moniker
+          }
+          is_outbound
+          remote_ip
+        }
+        disk_usage
+      }
+    }`;
+
+    const { getStatus: status } = await this._graph(query)();
+
+    return status;
+  }
 
   /**
    * Fetch Accounts.

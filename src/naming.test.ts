@@ -99,7 +99,7 @@ const namingTests = () => {
     const [record] = await registry.lookupAuthorities([subAuthority]);
     expect(record).toBeDefined();
     expect(record.ownerAddress).toBeDefined();
-    expect(record.ownerAddress).toBe(otherAccount1.formattedCosmosAddress);
+    expect(record.ownerAddress).toBe(otherAccount1.getCosmosAddress());
     expect(record.ownerPublicKey).toBeDefined();
     expect(Number(record.height)).toBeGreaterThan(0);
   });

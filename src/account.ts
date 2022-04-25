@@ -119,6 +119,13 @@ export class Account {
   }
 
   /**
+   * Get cosmos address.
+   */
+  getCosmosAddress() {
+    return this._formattedCosmosAddress;
+  }
+
+  /**
    * Get record signature.
    */
   async signRecord(record: any) {

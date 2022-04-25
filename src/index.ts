@@ -94,7 +94,8 @@ export const createBid = async (chainId: string, auctionId: string, bidderAddres
 export const isKeyValid = (key: string) => key && key.match(/^[0-9a-fA-F]{64}$/);
 
 export class Registry {
-  _endpoint: string
+  _endpoints: {[key: string]: string}
+  _chainID: string
   _chain: Chain
   _client: RegistryClient
 
@@ -115,8 +116,13 @@ export class Registry {
       throw new Error('Path to a GQL endpoint should be provided.');
     }
 
-    this._endpoint = restUrl;
+    this._endpoints = {
+      rest: restUrl,
+      gql: gqlUrl
+    };
+
     this._client = new RegistryClient(restUrl, gqlUrl);
+    this._chainID = chainId;
 
     this._chain = {
       cosmosChainId: chainId,
@@ -129,6 +135,28 @@ export class Registry {
    */
   async getAccounts(addresses: string[]) {
     return this._client.getAccounts(addresses);
+  }
+
+  get endpoints() {
+    return this._endpoints;
+  }
+
+  get chainID() {
+    return this._chainID;
+  }
+
+  /**
+   * Get server status.
+   */
+  async getStatus() {
+    return this._client.getStatus();
+  }
+
+  /**
+   * Get records by ids.
+   */
+  async getRecordsByIds(ids: string[], refs = false) {
+    return this._client.getRecordsByIds(ids, refs);
   }
 
   /**

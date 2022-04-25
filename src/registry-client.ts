@@ -133,6 +133,51 @@ export class RegistryClient {
     });
   }
 
+  /**
+   * Get server status.
+   */
+  async getStatus() {
+    const query = `query {
+      getStatus {
+        version
+        node {
+          id
+          network
+          moniker
+        }
+        sync {
+          latest_block_hash
+          latest_block_height
+          latest_block_time
+          catching_up
+        }
+        validator {
+          address
+          voting_power
+        }
+        validators {
+          address
+          voting_power
+          proposer_priority
+        }
+        num_peers
+        peers {
+          node {
+            id
+            network
+            moniker
+          }
+          is_outbound
+          remote_ip
+        }
+        disk_usage
+      }
+    }`;
+
+    const { getStatus: status } = await this._graph(query)();
+
+    return status;
+  }
 
   /**
    * Fetch Accounts.
@@ -159,6 +204,33 @@ export class RegistryClient {
     };
 
     return RegistryClient.getResult(this._graph(query)(variables), 'getAccounts');
+  }
+
+  /**
+   * Get records by ids.
+   */
+  async getRecordsByIds(ids: string[], refs = false) {
+    assert(ids);
+    assert(ids.length);
+
+    const query = `query ($ids: [String!]) {
+      getRecordsByIds(ids: $ids) {
+        id
+        names
+        owners
+        bondId
+        createTime
+        expiryTime
+        ${attributeField}
+        ${refs ? refsField : ''}
+      }
+    }`;
+
+    const variables = {
+      ids
+    };
+
+    return RegistryClient.getResult(this._graph(query)(variables), 'getRecordsByIds', RegistryClient.prepareAttributes('attributes'));
   }
 
   /**

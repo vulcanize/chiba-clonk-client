@@ -15,12 +15,20 @@ import { createTransaction } from "./txbuilder";
 import { Payload, Record } from './types';
 import { Util } from './util';
 import {
+  createTxMsgAssociateBond,
   createTxMsgCancelBond,
   createTxMsgCreateBond,
+  createTxMsgDissociateBond,
+  createTxMsgDissociateRecords,
+  createTxMsgReAssociateRecords,
   createTxMsgRefillBond,
   createTxMsgWithdrawBond,
+  MessageMsgAssociateBond,
   MessageMsgCancelBond,
   MessageMsgCreateBond,
+  MessageMsgDissociateBond,
+  MessageMsgDissociateRecords,
+  MessageMsgReAssociateRecords,
   MessageMsgRefillBond,
   MessageMsgWithdrawBond
 } from "./messages/bond";
@@ -103,6 +111,10 @@ export class Registry {
     // error string a stacktrace containing the message.
     // https://gist.github.com/nikugogoi/de55d390574ded3466abad8bffd81952#file-txresponse-js-L7
     const errorMessage = NAMESERVICE_ERRORS.find(message => error.includes(message))
+
+    if (!errorMessage) {
+      console.error(error)
+    }
 
     return errorMessage || DEFAULT_WRITE_ERROR;
   }
@@ -285,6 +297,62 @@ export class Registry {
     const sender = await this._getSender(account);
 
     const msg = createTxMsgCancelBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Associate record with bond.
+   */
+  async associateBond(params: MessageMsgAssociateBond, privateKey: string, fee: Fee) {
+    let result;
+    const account = new Account(Buffer.from(privateKey, 'hex'));
+    const sender = await this._getSender(account);
+
+    const msg = createTxMsgAssociateBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Dissociate record from bond.
+   */
+  async dissociateBond(params: MessageMsgDissociateBond, privateKey: string, fee: Fee) {
+    let result;
+    const account = new Account(Buffer.from(privateKey, 'hex'));
+    const sender = await this._getSender(account);
+
+    const msg = createTxMsgDissociateBond(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Dissociate all records from bond.
+   */
+  async dissociateRecords(params: MessageMsgDissociateRecords, privateKey: string, fee: Fee) {
+    let result;
+    const account = new Account(Buffer.from(privateKey, 'hex'));
+    const sender = await this._getSender(account);
+
+    const msg = createTxMsgDissociateRecords(this._chain, sender, fee, '', params)
+    result = await this._submitTx(msg, privateKey, sender);
+
+    return parseTxResponse(result);
+  }
+
+  /**
+   * Reassociate records (switch bond).
+   */
+  async reassociateRecords(params: MessageMsgReAssociateRecords, privateKey: string, fee: Fee) {
+    let result;
+    const account = new Account(Buffer.from(privateKey, 'hex'));
+    const sender = await this._getSender(account);
+
+    const msg = createTxMsgReAssociateRecords(this._chain, sender, fee, '', params)
     result = await this._submitTx(msg, privateKey, sender);
 
     return parseTxResponse(result);

@@ -493,6 +493,7 @@ export class Registry {
     await recordSignerAccount.signPayload(payload);
 
     // Send record payload Tx.
+    txPrivateKey = txPrivateKey || recordSignerAccount.getPrivateKey();
     return this._submitRecordPayloadTx({ payload, bondId }, txPrivateKey, fee);
   }
 

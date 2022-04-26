@@ -33,7 +33,7 @@ describe('Querying', () => {
     expect(registry.chainID).toBe(chainId);
   });
 
-  xtest('Get status.', async () => {
+  test('Get status.', async () => {
     const status = await registry.getStatus();
     expect(status).toBeDefined();
     expect(status.version).toBeDefined();

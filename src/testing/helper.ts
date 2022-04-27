@@ -26,7 +26,7 @@ export const getBaseConfig = async (path: string) => {
 export const provisionBondId = async (registry: Registry, privateKey: string, fee: Fee) => {
   let bonds = await registry.queryBonds();
   if (!bonds.length) {
-    await registry.createBond({ denom: 'uwire', amount: '1000000000' }, privateKey, fee);
+    await registry.createBond({ denom: 'aphoton', amount: '1000000000' }, privateKey, fee);
     bonds = await registry.queryBonds();
   }
 
